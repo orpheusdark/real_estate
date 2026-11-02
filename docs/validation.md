@@ -1,25 +1,45 @@
-# My validation record
+# Testing notes
 
-I deployed EstateIQ at https://estateiq-rho-ten.vercel.app . I distinguish the live service checks I performed from my isolated automated tests.
+Live site: https://estateiq-rho-ten.vercel.app
 
-## What I verified locally and in automation
+## Automated checks
 
-- I passed 24 tests with `npm test`, covering accounts, password hashing/reset tokens, session revocation, ownership, mass assignment, image validation/limits, filters, pagination, appointments, slot conflicts, status permissions, cancellation, headers/CORS, rate limits, archival, demo persistence, gallery assets, safe seeding, Vercel routing metadata and startup fallback.
-- I passed `npm run build`, including strict TypeScript, SEO generation and optimized Vite output.
-- I verified the real Mongoose adapter's API suite on GitHub Actions with an isolated MongoDB process, separately from my later Atlas checks.
-- I checked registration, listings, uploads, dashboard, guest viewing and cancellation in local Chrome demo mode. I also checked empty results, protected-route redirects, missing pages and responsive layouts.
+| Check              | Result                                                     |
+| ------------------ | ---------------------------------------------------------- |
+| `npm test`         | 24 API/catalog tests passed                                |
+| `npm run check`    | Strict frontend TypeScript passed                          |
+| `npm run build`    | SEO generation and production build passed                 |
+| Mongoose API suite | Passed on GitHub Actions with an isolated MongoDB instance |
+| Dependency audit   | Zero known vulnerabilities at the time of the check        |
 
-## What I verified against real services
+The API tests cover authentication, reset tokens, session revocation, ownership, invalid inputs, image limits, filtering, pagination, appointments, slot conflicts, confirmation/cancellation, security headers, CORS and rate limits. Other checks cover demo persistence, sample seeding, photo assets, Vercel routing fields and startup fallback.
 
-- I connected to MongoDB Atlas and passed a database ping after correcting password formatting and network access. I seeded the 18 illustrative homes under my owner account.
-- I verified Gmail SMTP connection and authentication without sending an email.
-- I verified the ImageKit key, then uploaded four actual images through the live property editor and displayed them in its gallery.
-- I checked live browsing, image loading, city/rent filtering, gallery selection, registration, cookie persistence after refresh, logout/login, property creation and mobile/tablet/desktop layouts in Chrome. I observed no browser page errors.
-- I removed my temporary live test account, property and ImageKit images after verification.
-- I checked that the published sitemap returns actual database property IDs and that both the local and live APIs report connected mode.
+## Browser checks
 
-## What I have not verified live
+The local demo was checked in Chrome for registration, listings, uploads, dashboard access, guest viewing requests and cancellation. Empty search results, protected-page redirects and missing pages were also checked.
 
-I chose to skip sending email during setup. I therefore have not tested production email delivery, reset-link delivery or live viewing submission. I covered the reset and appointment flows in local API tests, but I do not treat that as proof of live email delivery.
+On the deployed site, I checked:
 
-I added a guard that stops the local booking smoke script unless the API reports demo mode. I also added an explicit read-only sample catalog for production startup failures, rejecting writes until the live services reconnect.
+- Home page photos and property browsing
+- City/rent filtering and gallery selection
+- Registration and login/logout
+- Staying signed in after a refresh
+- Creating a listing and uploading four photos to ImageKit
+- Mobile, tablet and desktop layouts
+
+No browser page errors were observed during those live checks. The temporary account, listing and images were removed afterward.
+
+## Service checks
+
+- Atlas connection and database ping passed.
+- The 18 sample homes were saved under the owner account.
+- Gmail SMTP connection and authentication passed without sending email.
+- ImageKit credentials were accepted, followed by four successful uploads through the live editor.
+- The published sitemap returned actual database listing IDs.
+- Both local and live API health checks reported connected mode.
+
+## Still to verify
+
+Production email delivery, password-reset email delivery and live viewing submission have not been tested. Local API coverage for these flows does not confirm that production emails reach an inbox.
+
+The booking browser test stops unless the API reports demo mode. During a production startup failure, the site falls back to labelled sample browsing and rejects writes until services reconnect.

@@ -1,8 +1,10 @@
-# How I designed the REST API
+# API reference
 
-I grouped application endpoints under `/api` and return JSON errors as `{ "message": "..." }`. I support HttpOnly session cookies and `Authorization: Bearer <token>`. I return a token from login/register for API clients, while my React client uses the cookie without persisting JWTs in browser storage. I require the configured frontend Origin for cookie-authenticated writes and include browser credentials through Axios.
+All application routes use the `/api` prefix. Errors return `{ "message": "..." }` with an HTTP status code.
 
-## My endpoints
+Authentication accepts either the HttpOnly session cookie or `Authorization: Bearer <token>`. Login and registration return a token for API clients. The React app uses the cookie and does not save JWTs in browser storage. Cookie-authenticated writes require the configured frontend Origin header.
+
+## Routes
 
 | Method | Endpoint                             | Access / action                                              |
 | ------ | ------------------------------------ | ------------------------------------------------------------ |
@@ -27,11 +29,25 @@ I grouped application endpoints under `/api` and return JSON errors as `{ "messa
 | PATCH  | `/appointments/:id`                  | Owner confirms/cancels; attendee can cancel                  |
 | GET    | `/dashboard`                         | Signed in; own listings, own appointments, incoming requests |
 
-## How I handle search and property data
+## Property search
 
-I accept `q`, `location`, `type`, `purpose`, `minPrice`, `maxPrice`, `minArea`, `maxArea`, `bedrooms`, `sort`, `page` and `limit` on `GET /properties`. I default to newest-first sorting and also support `price-asc` and `price-desc`. I cap the page size at 24 and return `{items,total,page,pages}`. I escape search text into literal expressions rather than accepting MongoDB operators from the client.
+`GET /properties` accepts:
 
-I use the following property body:
+| Parameter              | Use                                                  |
+| ---------------------- | ---------------------------------------------------- |
+| `q`                    | Keyword search                                       |
+| `location`             | City/location search                                 |
+| `type`                 | Property type                                        |
+| `purpose`              | `Buy` or `Rent`                                      |
+| `minPrice`, `maxPrice` | Price range in INR                                   |
+| `minArea`, `maxArea`   | Area range in square feet                            |
+| `bedrooms`             | Minimum bedrooms                                     |
+| `sort`                 | Newest first by default; `price-asc` or `price-desc` |
+| `page`, `limit`        | Pagination, with a maximum page size of 24           |
+
+The response is `{items,total,page,pages}`. Search text is escaped and treated as a literal expression; client-supplied MongoDB operators are not accepted.
+
+## Property body
 
 ```json
 {
@@ -49,16 +65,29 @@ I use the following property body:
 }
 ```
 
-I support `Apartment`, `Villa`, `Independent house`, `Plot` and `Commercial` types, with `Buy` or `Rent` as the purpose. I treat rent prices as monthly INR and allow zero bedrooms/bathrooms for plots or commercial properties. I reject owner and image fields in the editable property body.
+Supported types are `Apartment`, `Villa`, `Independent house`, `Plot` and `Commercial`. Rent is monthly INR. Bedrooms and bathrooms may be zero for plots or commercial properties.
 
-## How I handle viewings
+Ownership is taken from the authenticated account. Owner and image fields cannot be assigned through this body. Upload photos separately using the multipart `images` field. The editor sends one photo per request, with a maximum of 4 MB per file and four photos per property.
 
-I accept `{name,email,phone,startsAt}`, with `startsAt` as an ISO UTC datetime. I allow hourly starts from 09:00 through 18:00 IST, between one hour and 90 days ahead. I return `{appointment,manageToken,emailSent}` after creating a request and keep the stored management-token hash out of dashboard responses.
+## Viewing requests
 
-I accept `{status:"confirmed"}` or `{status:"cancelled"}` for status changes and prevent cancelled requests from reopening. I limit confirmation to the property owner and allow the attendee to cancel.
+The request body is `{name,email,phone,startsAt}`, where `startsAt` is an ISO UTC datetime. Slots start hourly from 09:00 through 18:00 IST, between one hour and 90 days ahead.
 
-## My response and hosting behavior
+A successful request returns `{appointment,manageToken,emailSent}`. The management link is private; dashboard responses do not expose its stored hash.
 
-I use 400 for invalid input, 401 for an invalid session, 403 for permission/origin rejection, 404 for missing or archived resources, 409 for conflicts, 429 for rate limits, 500 for generic server errors and 502 for storage errors. I keep internal stack traces and credentials out of responses.
+Status changes accept `{status:"confirmed"}` or `{status:"cancelled"}`. Only the owner can confirm a viewing. The attendee can cancel, and cancelled requests cannot be reopened.
 
-I expose `/robots.txt` and `/sitemap.xml` at the website root. I serve the built frontend and deep links through Express in combined hosting, and use a same-origin Vercel function for the current deployment. I send photos one per request, with a 4 MB per-file limit and a maximum of four images per property.
+## Status codes
+
+| Code | Meaning                       |
+| ---- | ----------------------------- |
+| 400  | Invalid input                 |
+| 401  | Missing or invalid session    |
+| 403  | Permission or origin rejected |
+| 404  | Missing or archived resource  |
+| 409  | Conflict                      |
+| 429  | Rate limit reached            |
+| 500  | Server error                  |
+| 502  | External storage error        |
+
+Internal stack traces and credentials are kept out of responses. `/robots.txt` and `/sitemap.xml` are available at the website root. The current deployment serves the frontend and API from the same Vercel origin.

@@ -1,43 +1,51 @@
-# My development journal
+# Development notes
 
-## I started with separate web and API apps
+## Starting the project
 
-I created the two-app workspace, React/TypeScript build settings, API dependencies and environment examples. I kept production account values out of the repository and made local demo mode explicit.
+I started with separate `frontend` and `backend` folders. React and TypeScript handle the pages, while Express provides the API. Environment examples and local demo mode were added early so the project could run before the external accounts were configured.
 
-## I built accounts, ownership and viewing APIs
+## Accounts and properties
 
-I added Mongoose models and persistent local demo storage. I implemented JWT login, password reset, owner-only property management, image validation/storage, guest and authenticated appointments, cancellation, confirmation and security middleware.
+The first backend work covered the User, Property and Appointment models, followed by registration, login and password reset. Property ownership is checked on the server: hiding an edit button alone would not stop another account from making an API request.
 
-## I connected the main website flows
+Next came listing creation, editing and removal, along with photo uploads. Multer receives the files and Sharp validates and converts them before they reach ImageKit.
 
-I built the responsive EstateIQ identity, home collection, property search, gallery, booking form, account pages, listing editor and protected dashboard. I added API tests for permissions and the main workflows, then pushed my first three development milestones to GitHub.
+## Connecting the frontend
 
-## I checked the flows and prepared deployment
+Built the home page, search filters, property details, gallery, account forms and dashboard. The dashboard separates personal viewings from requests received for owned listings.
 
-I ran the API and browser flows, normalized appointment times to prevent alternate-format slot conflicts, added rate-limit coverage, updated vulnerable dependencies and made session-version increments atomic. I added initial HTML property metadata for combined hosting, robots, a sitemap, deep links and hosting configuration. I kept the MongoDB test separate when its local binary download progressed too slowly.
+Guest bookings use the same appointment model as registered bookings. A private link lets a guest check or cancel a request without creating an account.
 
-## I documented my implementation
+## Testing the main flows
 
-I added the API reference, requirements mapping, architecture, local/demo instructions, deployment alternatives, validation notes, setup checklist and screenshots. I kept the distinction between implemented features and integrations I had actually verified.
+Added tests for authentication, ownership, invalid uploads and appointment permissions. One issue was that different timestamp formats could represent the same viewing slot. Normalizing the timestamp before creating the slot key fixed that.
 
-## I verified the MongoDB adapter on GitHub
+Password reset tokens are single-use, and resetting a password invalidates old sessions. Logout also revokes the account's existing sessions.
 
-I ran the explicit `TEST_MONGO=true` workflow against an isolated MongoDB process. My complete 18-test API suite passed, alongside the JSON-demo suite, production build and dependency audit. At that stage, I had verified the adapter rather than a configured Atlas deployment.
+The local MongoDB binary download was slow, so the database adapter was checked separately on GitHub Actions. That API suite passed against an isolated MongoDB instance.
 
-## I expanded the home collection
+## Adding sample homes
 
-I added 18 illustrative homes across Indian cities, with fuller descriptions, amenities and three-photo galleries. I optimized 12 WebP photos and kept their source identifiers in a credits manifest. I made demo seeding idempotent so I could add missing sample homes without deleting unrelated properties or duplicating the collection.
+Added 18 sample homes across Indian cities, with descriptions, amenities and three-photo galleries. The collection uses 12 optimized WebP images. Seeding can run again without duplicating the homes or deleting unrelated listings.
 
-## I published an initial browsing preview
+The listings are labelled as examples because the photographs and prices do not represent verified property offers.
 
-I linked my EstateIQ Vercel project to GitHub and published a read-only catalog while I finished the database setup. I labelled the preview and withheld account/booking forms until the live services were connected. I added checks for gallery assets, pagination, blocked writes, safe seeding and Vercel routing metadata.
+## Deployment issues
 
-## I connected and checked the live platform
+The first Vercel version was a browsing preview while the database setup was pending. After connecting Atlas, ImageKit and Gmail, the same-origin Express API was enabled.
 
-I corrected the private database password formatting, updated Atlas network access, verified connectivity and seeded the 18 homes. I saved credentials in private Vercel environment settings, enabled the full same-origin Express API and sent uploads one file per request to respect Vercel's payload limit.
+A few details needed attention:
 
-I checked registration, session persistence after refresh, login/logout, listing creation, four real ImageKit uploads, filters, galleries and responsive layouts in live Chrome. I removed my temporary test account, listing and images. I chose not to send email, so I did not test live email delivery or viewing submission.
+- The Atlas password needed URL encoding and still had template angle brackets around it.
+- Atlas network access had to allow the deployment to connect.
+- Vercel added internal routing fields to requests, which initially broke the property filters.
+- Uploading photos together could exceed Vercel's payload limit, so the editor now sends one file per request, up to 4 MB each.
+- A static sitemap took precedence over the API route. Removing it from the Vercel build output allowed the database sitemap to be served.
 
-## I completed the deployment checks
+## Final checks
 
-I added a read-only startup fallback with retry behavior and tests, bringing my local API/catalog suite to 24 tests. I corrected Vercel's sitemap handling so it serves the actual database listing IDs. I also protected the local booking smoke test from running against connected email services.
+I checked the live site in Chrome: registration, login/logout, session persistence, listing creation, four ImageKit uploads, filters, gallery selection and responsive layouts. The temporary test account, listing and uploaded images were cleaned up afterward.
+
+The local API/catalog suite now has 24 passing tests. A read-only fallback keeps sample browsing available if the live app cannot initialize, while account and booking changes remain blocked. The connection is retried after 30 seconds.
+
+Email delivery and live viewing submission are still unchecked. SMTP authentication passed, but no email was sent during setup. The local booking browser test is restricted to demo mode to avoid sending test messages through real services.

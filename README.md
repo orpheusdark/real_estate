@@ -1,77 +1,90 @@
 # EstateIQ
 
-**My live website:** https://estateiq-rho-ten.vercel.app
+[Live website](https://estateiq-rho-ten.vercel.app)
 
-I chose the tagline **“Find a place for your next chapter.”**
+EstateIQ is a real estate website for browsing homes, posting listings and booking viewings. I built it for the Sapphire IQ full-stack project using React and TypeScript on the frontend, with Express and MongoDB on the backend.
 
-I built EstateIQ as a full-stack real estate platform for India, following the four core modules in the Sapphire IQ RealEstate Platform guide. I used React 19, TypeScript, React Router and Tailwind CSS for the frontend, and Express 5, Mongoose, JWT, bcrypt, Nodemailer, Multer and ImageKit for the backend.
+The site runs on Vercel and includes 18 sample homes with three photos each. These are demonstration listings, so the photos and prices should not be treated as real property offers.
 
-I deployed the frontend and Express API together on Vercel. I connected MongoDB Atlas, ImageKit and Gmail SMTP through private environment settings. I added 18 illustrative homes with three photos each, and enabled accounts, owner dashboards and property management. I also added a labelled, read-only sample catalog for database startup failures, with a connection retry after 30 seconds.
+## Features
 
-I have not implemented the optional AI Property Hub.
+- Registration, login and password reset
+- Property listings with owner-only edit and delete access
+- Up to four photos per property, stored in ImageKit
+- Filters for city, price, type, area, bedrooms and sale/rent
+- Guest and registered-user viewing requests
+- A dashboard for listings, appointments and incoming viewing requests
+- Owner confirmation and appointment cancellation
+- Responsive pages for mobile, tablet and desktop
 
-## How I run a local demo
+The optional AI Property Hub is not included. There is no payment or property transaction system.
 
-I use Node.js 24 and npm 11. From the repository root, I install the dependencies with:
+## Stack
+
+React 19, TypeScript, React Router, Tailwind CSS, Express 5, Mongoose, JWT, bcrypt, Nodemailer, Multer and ImageKit.
+
+## Run locally
+
+Node.js 24 and npm 11 are used for this project.
 
 ```sh
 npm ci
 ```
 
-For a new local checkout, I copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env`. I then start both apps with:
+Copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env`, then run:
 
 ```sh
 npm run dev
 ```
 
-I open **http://127.0.0.1:5173**. My example environment files enable local demo mode. I can register a local account or use the demonstration owner I seeded:
+Open http://127.0.0.1:5173.
 
-- Email: `demo@estateiq.local`
-- Password: `ExploreEstate2026!`
+The example files start the app in demo mode, so external accounts are not needed just to try it. For an Atlas connection and real uploads, fill in the service settings and set `DEMO_MODE=false`. Restart the API after changing the environment file.
 
-I use this public sample account only for local demonstrations. I prevent production from starting in demo mode or seeding this account. I store demo records in ignored `backend/data/estateiq.json`, local uploads in ignored `backend/uploads/`, and demo emails in ignored `backend/data/outbox/`. I can open a reset message in that outbox to follow its link; I do not deliver emails in demo mode.
+### Demo account
 
-If I leave the local JWT secret unset, I generate a temporary signing secret at startup, which invalidates those local sessions after a restart. My configured working copy now uses `DEMO_MODE=false` with Atlas and ImageKit; I explicitly switch it to `true` when I want an isolated demo.
+```text
+Email: demo@estateiq.local
+Password: ExploreEstate2026!
+```
 
-## What I implemented
+This account is only seeded in local demo mode. Demo records go into `backend/data/estateiq.json`, images into `backend/uploads/`, and email messages into `backend/data/outbox/`. No emails are sent in this mode. These folders are excluded from Git.
 
-- I added registration, login, current-user lookup, session revocation on logout, and password reset with hashed, expiring, single-use tokens.
-- I added property creation, editing and removal with API ownership checks, up to four images, image removal and a selectable gallery.
-- I added keyword/location search, sale/rent, type, price, area and bedroom filters, sorting and pagination. I run filtering and pagination in MongoDB when connected.
-- I added guest and authenticated viewing requests, private guest management links, cancellation, owner confirmation and active-slot conflict protection.
-- I built dashboard tabs for listings, personal viewings and incoming requests, with pending and upcoming counts.
-- I added responsive layouts, lazy routes, validation, loading/empty/error states, Helmet, CORS rules, origin checks and rate limiting.
-- I added SEO metadata, canonical URLs, robots, a database sitemap, deep links and Vercel/Render configuration. My combined Express hosting option also injects property metadata into the initial HTML.
+If `JWT_SECRET` is empty in demo mode, the app generates a temporary secret. Restarting the API then signs out existing demo sessions.
 
-I configured one-hour viewing slots from 9am to 6pm **IST**, between one hour and 90 days ahead. I keep a request pending until its owner confirms it. I have not added payments or property transaction processing.
-
-## How I check my work
+## Checks
 
 ```sh
 npm test
 npm run check
 npm run build
-npm run test:browser
 npm run test:mongo
 npm audit
 ```
 
-I use `npm test` for the API, catalog, seeding and serverless adapter checks. I use `npm run check` for strict frontend TypeScript and `npm run build` for SEO files and production bundles. My local booking browser test requires `DEMO_MODE=true` and a running local server; I added a guard so it cannot submit test bookings through live email services.
+The API and catalog suite has 24 passing tests. The Mongoose API suite also passed against an isolated MongoDB instance on GitHub Actions.
 
-I use an isolated MongoDB process for `npm run test:mongo`, without Atlas credentials. Its first run downloads a MongoDB binary, or I can supply an installed `mongod` through `MONGOMS_SYSTEM_BINARY`. I use installed Chrome by default for browser checks, with `BROWSER_CHANNEL` or `BROWSER_EXECUTABLE` available for another Chromium installation.
+For the local browser test, start the app with `DEMO_MODE=true`, then run:
 
-I verified the production build, TypeScript, 24 local API/catalog tests and responsive browser flows. My dependency audit reported zero known vulnerabilities at the time of the check. After stopping a slow local database download, I verified the real Mongoose adapter's 18-test API suite on [GitHub Actions](https://github.com/orpheusdark/real_eastate/actions/runs/41393536949).
+```sh
+npm run test:browser
+```
 
-I also verified Atlas connectivity and Gmail SMTP authentication. On the live Vercel site, I checked registration, session persistence after refresh, login/logout, listing creation and four real ImageKit uploads. I removed my temporary test records and images afterward. I chose to skip sending email, so I have not verified production email delivery or live viewing submission.
+This script refuses to run against connected services because it creates viewing requests. It uses installed Chrome by default. `BROWSER_CHANNEL` or `BROWSER_EXECUTABLE` can select another Chromium installation. The MongoDB test downloads a database binary on its first run; `MONGOMS_SYSTEM_BINARY` can point to an existing `mongod` instead.
 
-## How I manage configuration
+I checked the deployed site in Chrome, including registration, login/logout, keeping a session after refresh, creating a listing and uploading four images to ImageKit. The temporary account, listing and images were removed afterward. Mobile, tablet and desktop layouts were also checked.
 
-I documented my service settings and deployment options in [deployment and service setup](docs/deployment.md). I keep secrets in backend environment settings and use `VITE_` variables only for public values. I exclude `.env` files, private keys, reset links, local uploads and email messages from Git.
+Gmail SMTP authentication works, but email delivery and live viewing submission have not been tested. No email was sent during setup.
 
-- [My API reference](docs/api.md)
-- [My requirements and architecture](docs/requirements.md)
-- [My validation record](docs/validation.md)
-- [My development journal](docs/development-log.md)
-- [My image credits](docs/image-credits.md)
+## Deployment and notes
 
-![My EstateIQ desktop home page](docs/screenshots/home-desktop.png)
+The frontend and API share the same Vercel origin. MongoDB Atlas stores the records, ImageKit stores uploaded photos, and Gmail SMTP is configured for email. Private values stay in environment settings, outside Git.
+
+- [Setup and deployment](docs/deployment.md)
+- [API reference](docs/api.md)
+- [Requirements and architecture](docs/requirements.md)
+- [Testing notes](docs/validation.md)
+- [Development notes](docs/development-log.md)
+- [Image credits](docs/image-credits.md)
+
+![EstateIQ home page](docs/screenshots/home-desktop.png)
