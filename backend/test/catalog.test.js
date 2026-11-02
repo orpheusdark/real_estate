@@ -93,3 +93,31 @@ test('serverless adapter removes internal routing metadata before filtering', as
     server.close();
   }
 });
+
+test('unavailable live configuration falls back to explicit read-only browsing', async () => {
+  const old = process.env.LIVE_SERVICES,
+    uri = process.env.MONGODB_URI;
+  process.env.LIVE_SERVICES = 'true';
+  delete process.env.MONGODB_URI;
+  const { default: handler } = await import('../../api/server.js?fallback-check');
+  const http = await import('node:http');
+  const server = http.createServer((req, res) => {
+    const route = req.url.includes('register') ? 'auth/register' : 'health';
+    Object.defineProperty(req, 'query', {
+      configurable: true,
+      value: { __route: route, path: route },
+    });
+    handler(req, res);
+  });
+  try {
+    const r = await request(server).get('/api/health').expect(200);
+    assert.equal(r.body.mode, 'showcase');
+    await request(server).post('/api/auth/register').send({}).expect(503);
+  } finally {
+    server.close();
+    if (old === undefined) delete process.env.LIVE_SERVICES;
+    else process.env.LIVE_SERVICES = old;
+    if (uri === undefined) delete process.env.MONGODB_URI;
+    else process.env.MONGODB_URI = uri;
+  }
+});

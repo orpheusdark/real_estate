@@ -23,3 +23,15 @@ Added the API reference, requirement mapping, architecture, local/demo usage, de
 ## Verified the MongoDB adapter on GitHub
 
 The explicit `TEST_MONGO=true` workflow passed the complete 18-test suite against an isolated MongoDB process, in addition to the JSON-demo suite, production build and dependency audit. This verifies the Mongoose adapter without implying any Atlas, ImageKit, SMTP or deployment credentials were configured.
+
+## Expanded homes and deployed the browsing preview
+
+Added 18 illustrative homes across Indian cities with fuller descriptions, amenities and three-photo galleries. Twelve optimized WebP photos are served locally, with source identifiers retained in the credits manifest. Demo seeding adds missing sample homes without deleting user properties or duplicating the collection.
+
+Linked the EstateIQ Vercel project to GitHub and published a read-only catalog while database authentication is pending. Added explicit preview messaging and withheld account/booking forms so visitors cannot mistake a sample catalog for a connected marketplace. Added tests for gallery assets, pagination, blocked writes, idempotent seeding and serverless routing metadata. No credentials are deployed with the preview.
+
+## Connected and verified the full live platform
+
+Corrected private database password formatting, verified Atlas connectivity and seeded the 18 homes. Applied service credentials through private Vercel environment settings, enabled the full same-origin Express API and adapted image uploads to one file per request. Atlas network access was updated by the user.
+
+Live Chrome checks passed registration, persistent cookie sessions, login/logout, property creation, four real ImageKit uploads, property filters, galleries and responsive layouts. All temporary live test records and images were removed. No email was sent and live viewing submission was not tested, respecting the user's instruction to skip email. Added startup fallback and sitemap coverage for temporary database unavailability.

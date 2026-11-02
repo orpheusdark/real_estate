@@ -33,6 +33,15 @@ export function createCatalogApp() {
   app.get('/api/health', (req, res) =>
     res.json({ status: 'ok', mode: 'showcase', properties: rows.length }),
   );
+  app.get('/sitemap.xml', (req, res) => {
+    const site = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+    const escape = (v) => v.replaceAll('&', '&amp;').replaceAll('<', '&lt;');
+    res
+      .type('xml')
+      .send(
+        `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['', '/properties', ...rows.map((p) => '/properties/' + p.id)].map((p) => `<url><loc>${escape(new URL(p || '/', site).href)}</loc></url>`).join('')}</urlset>`,
+      );
+  });
   app.get(['/api/users/me', '/api/dashboard'], (req, res) => res.status(401).json(unavailable));
   const store = {
     one: async (table, q) =>

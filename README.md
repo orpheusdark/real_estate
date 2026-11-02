@@ -1,5 +1,9 @@
 # EstateIQ
 
+**Live website:** https://estateiq-rho-ten.vercel.app
+
+The frontend and Express API run together on Vercel, with MongoDB Atlas, ImageKit and Gmail SMTP configured through private production settings. The collection contains 18 illustrative homes, each with three photos. Accounts, owner dashboards and property management are enabled. If the database cannot initialize, the server provides a labelled, read-only sample catalog and retries the connection after 30 seconds.
+
 **Find a place for your next chapter.** A full-stack real estate platform for India, implementing the four core modules in the Sapphire IQ RealEstate Platform guide.
 
 React 19 + TypeScript + React Router + Tailwind CSS, with an Express 5 REST API, Mongoose, JWT, bcrypt, Nodemailer, Multer and ImageKit. The optional AI Property Hub is outside this core build and is not implemented.
@@ -40,7 +44,7 @@ Viewings are one-hour slots starting on the hour from 9am to 6pm **IST**, at lea
 ## Checks
 
 ```sh
-npm test                  # 18 API tests using isolated local demo storage
+npm test                  # Full API, catalog, seeding and serverless adapter tests
 npm run check             # Strict frontend TypeScript
 npm run build             # SEO files, TypeScript and production bundles
 npm run test:browser       # Chrome smoke flow; run npm run dev in another terminal first
@@ -50,7 +54,7 @@ npm audit
 
 The MongoDB command downloads a MongoDB binary on first use and needs network access. It does not use Atlas credentials. `MONGOMS_SYSTEM_BINARY` can point to an installed `mongod`. Browser checks use installed Chrome by default; set `BROWSER_CHANNEL` or `BROWSER_EXECUTABLE` for another Chromium installation. Browser checks create a local test account and remove their test listing when successful.
 
-**Verified during this build:** production build, TypeScript, 18 local API tests, desktop/mobile browser flow, and dependency audit (zero known vulnerabilities). The local MongoDB binary download was stopped because it was too slow; the same 18-test suite subsequently passed against an isolated MongoDB instance on GitHub Actions. Atlas, ImageKit, SMTP and hosted deployment have not been configured or tested. The [GitHub validation run](https://github.com/orpheusdark/real_eastate/actions/runs/41393536949) passed the API, MongoDB, build and production audit steps.
+**Verified during this build:** production build, TypeScript, 24 local API/catalog tests, desktop/mobile browser flow, and dependency audit (zero known vulnerabilities). The local MongoDB binary download was stopped because it was too slow; the same 18-test suite subsequently passed against an isolated MongoDB instance on GitHub Actions. Atlas connectivity and Gmail SMTP authentication have since passed. The full Vercel site was tested in Chrome with registration, persisted cookie sessions, login/logout, listing creation and four real ImageKit uploads. Temporary test records and images were removed. Email delivery and live viewing submissions were skipped at the user’s request. The [GitHub validation run](https://github.com/orpheusdark/real_eastate/actions/runs/41393536949) passed the API, MongoDB, build and production audit steps.
 
 ## Configuration comes last
 

@@ -16,7 +16,7 @@ All application endpoints use `/api`. JSON errors have `{ "message": "..." }`. A
 | POST   | `/properties`                        | Signed in; create a listing                                  |
 | PATCH  | `/properties/:id`                    | Owner; replace editable property details                     |
 | DELETE | `/properties/:id`                    | Owner; archive listing and cancel its active appointments    |
-| POST   | `/properties/:id/images`             | Owner; multipart field `images`, up to 4 total, 5 MB/file    |
+| POST   | `/properties/:id/images`             | Owner; multipart field `images`, up to 4 total, 4 MB/file    |
 | DELETE | `/properties/:id/images/:fileId`     | Owner; remove an image                                       |
 | POST   | `/properties/:id/appointments/guest` | Guest viewing request                                        |
 | POST   | `/properties/:id/appointments`       | Signed-in viewing request                                    |

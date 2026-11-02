@@ -3,10 +3,12 @@ import { createApp } from '../backend/src/app.js';
 import { createStore } from '../backend/src/store.js';
 import { configuration } from '../backend/src/config.js';
 let appPromise;
+let retryAt = 0;
+const catalog = createCatalogApp();
 async function application() {
   if (!appPromise) {
     appPromise = (async () => {
-      if (process.env.LIVE_SERVICES !== 'true') return createCatalogApp();
+      if (process.env.LIVE_SERVICES !== 'true') return catalog;
       const config = configuration({
         ...process.env,
         NODE_ENV: 'production',
@@ -17,6 +19,8 @@ async function application() {
       return createApp(store, config);
     })().catch((e) => {
       appPromise = undefined;
+      retryAt = Date.now() + 30000;
+      console.error('Live service startup failed', e.name);
       throw e;
     });
   }
@@ -40,15 +44,10 @@ export default async function handler(req, res) {
     value: query,
   });
   try {
-    const app = await application();
+    const app = Date.now() < retryAt ? catalog : await application();
     return app(req, res);
   } catch {
-    res.statusCode = 503;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(
-      JSON.stringify({
-        message: 'The service is temporarily unavailable. Please try again shortly.',
-      }),
-    );
+    // Keep public sample browsing available; catalog rejects every mutation.
+    return catalog(req, res);
   }
 }

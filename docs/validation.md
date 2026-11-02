@@ -24,3 +24,11 @@ The API suite exercises configuration guards, password hashing, duplicate regist
 - A live Vercel or Render deployment.
 
 Screenshots in `docs/screenshots/` are local demo captures. Seed imagery comes from Unsplash and can depend on network availability. Browser smoke tests use an actual uploaded PNG fixture for the image workflow.
+
+## Subsequent live deployment verification
+
+The full app is deployed at https://estateiq-rho-ten.vercel.app . The expanded local API/catalog suite has 24 passing tests. The production build and strict TypeScript check pass.
+
+Atlas connection and ping passed after the user updated network access. Gmail SMTP authentication passed; no email was sent. ImageKit credentials passed, followed by four actual uploads through the live property editor. Live Chrome checks passed registration, session persistence on refresh, logout/login, property creation, image display, city/rent filtering, gallery selection and mobile/tablet/desktop layouts without page errors. Temporary test images, listing and account were removed.
+
+Email delivery, reset-link delivery and live viewing submission remain untested at the user's request to skip email. These flows have automated local API coverage; do not equate that with confirmed production email delivery.
