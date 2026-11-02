@@ -1,10 +1,10 @@
-# Service setup and deployment
+# How I configured services and deployed EstateIQ
 
-Account configuration was initially deferred until after building. The full application is now deployed on Vercel; the current setup is described below. Do not paste secrets into chat or commit them. Configure them directly in your local `.env` or hosting environment settings.
+I initially deferred account configuration until the application was built. I then connected the services and deployed the full application on Vercel. I keep credentials in local `.env` files and private hosting settings, outside Git.
 
-## Required backend values
+## My backend settings
 
-| Variable                              | Value to configure                                                                               |
+| Variable                              | How I configure it                                                                               |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `NODE_ENV`                            | `production` on the host                                                                         |
 | `DEMO_MODE`                           | `false` on the host                                                                              |
@@ -13,74 +13,76 @@ Account configuration was initially deferred until after building. The full appl
 | `FRONTEND_URL`                        | Exact HTTPS website origin, without trailing slash                                               |
 | `PUBLIC_API_URL`                      | Exact HTTPS API origin, without trailing slash                                                   |
 | `IMAGEKIT_PRIVATE_KEY`                | Private key, backend only                                                                        |
-| `SMTP_HOST`, `SMTP_PORT`              | Your provider's SMTP host and port                                                               |
+| `SMTP_HOST`, `SMTP_PORT`              | My provider's SMTP host and port                                                                 |
 | `SMTP_SECURE`                         | `true` for implicit TLS, typically port 465; otherwise `false`, typically port 587 with STARTTLS |
 | `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Provider credentials and verified sender                                                         |
-| `TRUST_PROXY`                         | `1` only behind the trusted single proxy used by Render; otherwise `0`                           |
+| `TRUST_PROXY`                         | `1` behind my trusted single Vercel/Render proxy; otherwise `0`                                  |
 | `PORT`                                | Supplied by the hosting platform                                                                 |
 
-Generate a JWT secret on your own machine with `node -e "console.log(require('node:crypto').randomBytes(48).toString('hex'))"`, then save it privately. Rotating it signs everyone out. This command prints a secret; do not copy its output into documentation or Git history.
+I generate a JWT signing secret locally with:
 
-Atlas creates the `users`, `properties` and `appointments` collections through Mongoose. Startup initializes the email and viewing-slot unique indexes. Allow the server's network access in Atlas; use the narrowest available network rules. Use an empty production database: demo JSON data is not automatically imported.
+```sh
+node -e "console.log(require('node:crypto').randomBytes(48).toString('hex'))"
+```
 
-Uploads go from Multer through Sharp for validation, resizing and WebP conversion, then to ImageKit's server-side REST upload endpoint. Only the private key is needed for this server flow; no ImageKit key is exposed to the browser. Files are stored under `/estateiq/properties`. Verify that the account serves returned HTTPS image URLs.
+I save the output privately and never put it in documentation or Git history. I use a secret of at least 32 characters; rotating it signs existing sessions out.
 
-## Option A: one Render service, one origin
+I use a dedicated Atlas database user and configure network access for the application. I corrected URL encoding and removed template angle brackets from the database password before connecting. I updated the Atlas IP access list when the deployment could not reach the cluster. I initialize the `users`, `properties` and `appointments` collections and the unique email/viewing-slot indexes through Mongoose. I do not automatically import local demo JSON into production.
 
-This is the simplest cookie-compatible deployment. The Express server serves both the built React app and `/api`. It also injects property-specific SEO metadata into the initial property HTML.
+I pass uploads from Multer through Sharp for decoding, resizing and WebP conversion, then store them through ImageKit's server-side upload API under `/estateiq/properties`. I keep the private ImageKit key on the backend and expose only the returned image URLs to the browser.
 
-1. Create a Render Blueprint from this repository using `render.yaml`, or create a Node web service with repository root as its root directory.
-2. Build: `npm ci && npm run build`. Start: `npm start`. Health: `/api/health`.
-3. Set the backend values above. Set `FRONTEND_URL`, `PUBLIC_API_URL` and `VITE_SITE_URL` to the **same** Render HTTPS origin (or the same custom website origin). Leave `VITE_API_URL` empty for same-origin requests.
-4. Deploy and run the live checklist below. No persistent filesystem is required in production because records use MongoDB and images use ImageKit.
+I configure Gmail with `smtp.gmail.com`, port `587`, `SMTP_SECURE=false`, the sender address and a Google app password. I verified SMTP authentication without sending email. I keep the app password private rather than using my normal Google account password.
 
-The included Blueprint generates a JWT secret, but the other account values remain manual. No Render deployment was created; the current live deployment uses Vercel.
+## My current full-stack Vercel deployment
 
-## Option B: Vercel frontend and Render API
+**My live site:** https://estateiq-rho-ten.vercel.app
 
-The repository includes root `vercel.json` for the static Vite frontend and deep-link rewrites. Import the repository root into Vercel; build `npm run build`; output `frontend/dist`; install `npm ci`.
+I created the `estateiq` project in my `orpheusdarks-projects` workspace and linked it to this GitHub repository for automatic deployments. I use Node.js 24, `npm ci` for installation, `npm run build` for the build and `frontend/dist` for the static output.
 
-- Set Vercel `VITE_API_URL` to the Render API HTTPS origin and `VITE_SITE_URL` to the Vercel website HTTPS origin. Redeploy after changing these build-time values.
-- Set Render `FRONTEND_URL` to that exact frontend origin and `PUBLIC_API_URL` to its API origin. CORS and reset/booking email links use these settings.
-- Use same-site custom domains, for example a website on `estateiq.example` and API on `api.estateiq.example`, or configure a same-origin external `/api` rewrite to the Render API. With a rewrite, leave `VITE_API_URL` blank. Update the `vercel.json` rewrites before the SPA fallback with your actual API host when configuring this route.
-- Separate `vercel.app` and `onrender.com` origins use cross-site cookies. Although the API sets Secure, HttpOnly and SameSite=None in production, some browsers block third-party cookies. Use the same-site or same-origin arrangement above and verify it in your target browsers.
-- Static Vercel pages update title, description and canonical tags in the browser. For property-specific social preview metadata in the initial HTML, use the combined Render deployment. Both configurations provide sitemaps; the API sitemap includes every active property.
+I route API requests through `api/server.js` to the full Express app when `LIVE_SERVICES=true`. I reuse the MongoDB connection across warm requests and enforce production configuration, `DEMO_MODE=false` and a trusted single Vercel proxy in that function. I remove Vercel's internal wildcard query fields before validating application filters.
 
-Never use `VITE_` names for private keys, MongoDB strings, SMTP passwords or JWT secrets. Build-time public origins are safe to expose.
+I leave `VITE_API_URL` empty and use relative `/api` requests so the frontend and authentication cookies share one origin. I point `FRONTEND_URL`, `PUBLIC_API_URL` and `VITE_SITE_URL` to the live website. I use `VITE_` variables only for public values, never database strings, private keys, SMTP passwords or signing secrets.
 
-## Live acceptance checklist after configuration
+I store `MONGODB_URI`, `JWT_SECRET`, `IMAGEKIT_PRIVATE_KEY`, `SMTP_USER`, `SMTP_PASS` and `SMTP_FROM` as private Vercel settings. I keep public origins and other non-secret values in ordinary configuration. I exclude private environment files, local data and uploads from deployment inputs.
 
-- Confirm `/api/health` reports `connected`, not `demo`.
-- Register two accounts, sign in, refresh a protected deep link such as `/dashboard`, and sign out.
-- Upload four real images, inspect their ImageKit URLs, remove one, and check the gallery.
-- Confirm the second account receives 403 when editing or deleting the first account's listing.
-- Submit guest and authenticated viewings; confirm from the owner's dashboard; cancel from the user's dashboard and a guest private link.
-- Request a password reset. Verify real email delivery, reset the password, then verify that old sessions and a reused reset link fail.
-- Test unknown emails, wrong passwords, invalid inputs, duplicate viewing slots and unavailable storage.
-- Visit `/robots.txt`, `/sitemap.xml` and a property deep link. Verify the expected website origin in canonical tags and email links.
-- Confirm denied CORS origins do not receive allow-origin headers and cookie-authenticated writes from other origins fail.
-- Check Render and Vercel logs without exposing tokens or connection strings. Review GitHub checks.
+I seeded 18 illustrative homes under the owner account associated with my configured university email. I generated its initial password randomly and did not send or expose it. When I am ready to choose an owner password, I can use Forgot password. I have not sent that reset email during setup. I also allow normal registration for other accounts.
 
-## Operational boundaries
+I accept four images per property, up to 4 MB per file. I send one image per request so uploads stay below Vercel's 4.5 MB function payload limit. I route `/sitemap.xml` to the API for actual database listing IDs, and remove the static sitemap from the Vercel build output so it cannot take precedence over that route.
 
-Demo JSON storage is single-process development storage and is forbidden in production. Production rate limits are in-process and reset on restart; use a shared limiter before scaling to multiple instances. Listing removal archives the property and cancels active requests; archived images remain for record retention. Failed remote image cleanup logs a generic message and may need an ImageKit cleanup pass. Email failures do not erase a successfully saved viewing; the UI gives the guest a private management link. Password-reset responses remain generic even when delivery fails, so monitor delivery logs.
+If the live app cannot initialize, I serve a labelled, read-only sample catalog and retry after 30 seconds. I reject account, listing and booking writes during that fallback. If I intentionally want a showcase-only deployment, I set `LIVE_SERVICES=false` and redeploy.
 
-Keep database backups and define a retention policy for archived listings and personal contact details before operating a public marketplace. The application does not verify property ownership documents or handle payments. These are separate product capabilities, not parts of the supplied core guide.
+## How I run the connected app locally
 
-## Current full-stack Vercel deployment
+I set `DEMO_MODE=false` in my private local environment and run `npm run dev` to use Atlas and ImageKit. If I want an isolated local demonstration, I explicitly set `DEMO_MODE=true`. I forbid JSON demo storage in production.
 
-Live site: https://estateiq-rho-ten.vercel.app . Project: `estateiq`, workspace: `orpheusdarks-projects`. GitHub is connected for deployment from this repository.
+I use `npm run services:check` to verify database connectivity and SMTP authentication without sending an email. I restart the local API after changing environment settings.
 
-The root `api/server.js` function routes requests to the full Express application when `LIVE_SERVICES=true`. MongoDB connections are reused across warm requests. `DEMO_MODE=false`, a production configuration and a single trusted Vercel proxy are enforced for this function. The frontend uses relative `/api` requests, so authentication cookies remain on the same origin. Vercel wildcard routing metadata is removed before validating application filters.
+## My alternative Render deployment options
 
-Private Vercel environment settings contain `MONGODB_URI`, `JWT_SECRET`, `IMAGEKIT_PRIVATE_KEY`, `SMTP_USER`, `SMTP_PASS` and `SMTP_FROM`. Public origins and non-secret settings use plain configuration values. `VITE_API_URL` stays empty; `FRONTEND_URL`, `PUBLIC_API_URL` and `VITE_SITE_URL` point to the live origin. Do not commit `.env` files or copy private values into deployment commands or logs.
+I prepared `render.yaml` as an alternative; I have not created a Render deployment for EstateIQ.
 
-MongoDB holds the 18 illustrative listings, seeded under the configured university email's owner account. The initial owner password was generated randomly and was not sent or exposed; use Forgot password when ready to choose an owner password. No reset email was sent during setup, at the user's request. Other users can register normally.
+If I deploy everything as one Render service, I use the repository root, build with `npm ci && npm run build`, start with `npm start` and check `/api/health`. I set `FRONTEND_URL`, `PUBLIC_API_URL` and `VITE_SITE_URL` to the same HTTPS origin and leave `VITE_API_URL` empty. I can also use this combined Express option for property-specific metadata in the initial HTML.
 
-Photo uploads accept up to four images, maximum 4 MB per file. The editor sends one file per request to stay below Vercel's 4.5 MB function payload limit. Sharp decodes and converts the images before ImageKit stores them. The dynamic `/sitemap.xml` route comes from the API and reflects actual database property IDs.
+If I split the Vercel frontend and Render API, I set `VITE_API_URL` to the API origin, `VITE_SITE_URL` to the website origin, and Render's `FRONTEND_URL` to that exact website origin. I redeploy after changing build-time values. I would use same-site custom domains or a same-origin `/api` rewrite and verify cookies in the target browsers, since separate `vercel.app` and `onrender.com` domains can encounter third-party cookie restrictions.
 
-If the live application cannot initialize, the function serves an explicit read-only sample catalog and retries after 30 seconds. It never pretends to save account, property or booking mutations during fallback. Set `LIVE_SERVICES=false` and redeploy only when an intentional showcase-only deployment is wanted.
+I would check the hosting plan's SMTP restrictions before moving the API: Render's free web services block SMTP ports 465 and 587. I would need a compatible hosting plan or an email HTTP API for that option.
 
-Verification completed: Atlas connection and ping, Gmail SMTP authentication without sending email, ImageKit credential verification, and live Chrome registration, persisted cookie sessions, login/logout, property creation and four actual ImageKit uploads. Temporary test images and database records were removed. Email delivery and live booking submissions were not exercised because the user asked to skip email.
+## What I checked after deployment
 
-The local `.env` now also has `DEMO_MODE=false`; `npm run dev` uses Atlas and ImageKit. To run an isolated JSON demo instead, explicitly set `DEMO_MODE=true` locally. Production refuses JSON demo storage.
+- I confirmed that the local and live `/api/health` endpoints report `connected`.
+- I verified Atlas connection/ping, seeded listings and ImageKit credentials.
+- I checked live registration, login/logout, session persistence on refresh, listing creation and four actual ImageKit uploads in Chrome.
+- I checked live filters, galleries, photo assets and mobile/tablet/desktop layouts without browser page errors.
+- I verified that the published sitemap includes actual database property IDs.
+- I removed my temporary live test account, listing and images.
+- I passed Gmail SMTP authentication, but chose not to send email. I therefore have not checked production email delivery, reset-link delivery or live viewing submission.
+
+I covered ownership rejection, password reset, guest/authenticated viewings, slot conflicts, confirmation/cancellation, validation, CORS, rate limits and other error cases in automated local API tests. Before claiming those flows are tested in production, I would run the corresponding live acceptance checks and verify their results.
+
+## My operational limits
+
+I use JSON storage only for one-process local demonstrations. My production rate limits are in-process and reset on restart; I would add a shared limiter before scaling across instances. I archive removed listings and cancel their active requests, while retaining archived images. I log generic cleanup failures and may need an ImageKit cleanup pass if a remote deletion fails.
+
+I keep a saved viewing request even if its email fails, and provide the private guest management link in the UI. I keep password-reset responses generic even on delivery failure and check server logs when investigating email issues.
+
+Before operating a public marketplace, I would define database backups and retention rules for archived listings and contact details. I have not added ownership-document verification or payment processing; I kept those outside the supplied core project scope.

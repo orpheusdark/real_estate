@@ -1,6 +1,8 @@
-# REST API
+# How I designed the REST API
 
-All application endpoints use `/api`. JSON errors have `{ "message": "..." }`. Authentication supports the HttpOnly session cookie and `Authorization: Bearer <token>`. Login/register return a token for API clients; the React client uses the cookie and does not persist JWTs in browser storage. Cookie writes require the configured frontend Origin header. Browser requests include credentials through Axios.
+I grouped application endpoints under `/api` and return JSON errors as `{ "message": "..." }`. I support HttpOnly session cookies and `Authorization: Bearer <token>`. I return a token from login/register for API clients, while my React client uses the cookie without persisting JWTs in browser storage. I require the configured frontend Origin for cookie-authenticated writes and include browser credentials through Axios.
+
+## My endpoints
 
 | Method | Endpoint                             | Access / action                                              |
 | ------ | ------------------------------------ | ------------------------------------------------------------ |
@@ -25,9 +27,11 @@ All application endpoints use `/api`. JSON errors have `{ "message": "..." }`. A
 | PATCH  | `/appointments/:id`                  | Owner confirms/cancels; attendee can cancel                  |
 | GET    | `/dashboard`                         | Signed in; own listings, own appointments, incoming requests |
 
-`GET /properties` accepts `q`, `location`, `type`, `purpose`, `minPrice`, `maxPrice`, `minArea`, `maxArea`, `bedrooms`, `sort`, `page`, `limit`. Sort is newest by default, `price-asc`, or `price-desc`. Limit is capped at 24. Result: `{items,total,page,pages}`. Search uses escaped literal expressions, never client-supplied MongoDB operators.
+## How I handle search and property data
 
-Property body:
+I accept `q`, `location`, `type`, `purpose`, `minPrice`, `maxPrice`, `minArea`, `maxArea`, `bedrooms`, `sort`, `page` and `limit` on `GET /properties`. I default to newest-first sorting and also support `price-asc` and `price-desc`. I cap the page size at 24 and return `{items,total,page,pages}`. I escape search text into literal expressions rather than accepting MongoDB operators from the client.
+
+I use the following property body:
 
 ```json
 {
@@ -45,10 +49,16 @@ Property body:
 }
 ```
 
-Types: `Apartment`, `Villa`, `Independent house`, `Plot`, `Commercial`. Purpose: `Buy` or `Rent`; rent prices are monthly INR. Bedrooms and bathrooms can be zero for plots/commercial properties. Owner and image fields cannot be assigned through the property body.
+I support `Apartment`, `Villa`, `Independent house`, `Plot` and `Commercial` types, with `Buy` or `Rent` as the purpose. I treat rent prices as monthly INR and allow zero bedrooms/bathrooms for plots or commercial properties. I reject owner and image fields in the editable property body.
 
-Viewing body: `{name,email,phone,startsAt}`, with `startsAt` an ISO UTC datetime. Slots start hourly from 09:00 through 18:00 IST, between one hour and 90 days ahead. Successful creation returns `{appointment,manageToken,emailSent}`. Keep the management token private; dashboards never expose its stored hash. Status changes use `{status:"confirmed"}` or `{status:"cancelled"}`. Cancelled requests cannot be reopened.
+## How I handle viewings
 
-Common statuses: 400 invalid input, 401 no valid session, 403 permission/origin denied, 404 missing/archived resource, 409 conflict, 429 rate limit, 500 generic server error, 502 external storage error. Internal stack traces and credentials are not returned.
+I accept `{name,email,phone,startsAt}`, with `startsAt` as an ISO UTC datetime. I allow hourly starts from 09:00 through 18:00 IST, between one hour and 90 days ahead. I return `{appointment,manageToken,emailSent}` after creating a request and keep the stored management-token hash out of dashboard responses.
 
-Public root endpoints: `/robots.txt` and `/sitemap.xml`. With a built frontend present, Express also serves the website and deep links.
+I accept `{status:"confirmed"}` or `{status:"cancelled"}` for status changes and prevent cancelled requests from reopening. I limit confirmation to the property owner and allow the attendee to cancel.
+
+## My response and hosting behavior
+
+I use 400 for invalid input, 401 for an invalid session, 403 for permission/origin rejection, 404 for missing or archived resources, 409 for conflicts, 429 for rate limits, 500 for generic server errors and 502 for storage errors. I keep internal stack traces and credentials out of responses.
+
+I expose `/robots.txt` and `/sitemap.xml` at the website root. I serve the built frontend and deep links through Express in combined hosting, and use a same-origin Vercel function for the current deployment. I send photos one per request, with a 4 MB per-file limit and a maximum of four images per property.

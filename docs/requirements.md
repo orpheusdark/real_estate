@@ -1,18 +1,18 @@
-# Core requirement coverage
+# How I covered the core requirements
 
-Based on the supplied nine-page Sapphire IQ RealEstate Platform student guide. The original PDF remains the reference; it was not modified.
+I followed the supplied nine-page Sapphire IQ RealEstate Platform guide. I kept the original PDF as reference material and did not modify it.
 
-| Guide module    | Implementation                                                                                                                                                                                                 |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Foundation   | Separate frontend/backend, React TypeScript, Express, User/Property/Appointment Mongoose models, JWT auth, bcrypt, Nodemailer reset flow, `/api/users/me`, ignored secrets and environment examples            |
-| 2. Properties   | Owner-only create/edit/delete, up to four images using Multer + ImageKit, image gallery, literal search, price/type/location/area filters, React Router, Tailwind, lazy pages                                  |
-| 3. Appointments | Separate guest/auth booking routes sharing one model, pending/confirmed/cancelled status, owner confirmation, attendee cancellation, guest management links, protected dashboard and AuthContext, Axios client |
-| 4. Production   | Helmet, CORS allowlist, origin checks, rate limits, SEO tags, robots and sitemap, deep links, Render and Vercel configuration, environment validation and deployment instructions                              |
-| 5. Optional AI  | Not implemented; the four core modules run independently of AI services                                                                                                                                        |
+| Guide module    | What I implemented                                                                                                                                                                                                                                 |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Foundation   | I created separate frontend/backend apps, React TypeScript pages, Express routes, User/Property/Appointment Mongoose models, JWT authentication, bcrypt hashing, Nodemailer reset flow, `/api/users/me`, environment examples and ignored secrets. |
+| 2. Properties   | I implemented owner-only CRUD, up to four images through Multer and ImageKit, a gallery, literal search, price/type/location/area filters, React Router, Tailwind and lazy pages.                                                                  |
+| 3. Appointments | I implemented guest/authenticated booking routes with one model, pending/confirmed/cancelled statuses, owner confirmation, attendee cancellation, private guest links, AuthContext, Axios and a protected dashboard.                               |
+| 4. Production   | I added Helmet, CORS rules, origin checks, rate limits, SEO tags, robots, a database sitemap, deep links, environment validation, deployment instructions and Vercel/Render configuration.                                                         |
+| 5. Optional AI  | I have not implemented the optional AI module. I kept the core platform independent of AI services.                                                                                                                                                |
 
-The full platform is deployed on Vercel with Atlas, ImageKit and Gmail SMTP configured. Live account, cookie-session and ImageKit upload checks passed. Email delivery and live viewing submission remain untested at the user’s request; see the validation record.
+I deployed the full platform on Vercel with Atlas, ImageKit and Gmail SMTP configured. I passed live account, cookie-session and ImageKit upload checks. I have not tested live email delivery or viewing submission because I chose to skip sending email during setup.
 
-## Architecture
+## How I structured the application
 
 ```mermaid
 flowchart LR
@@ -28,10 +28,10 @@ flowchart LR
   API --> Outbox[Local email outbox in demo mode]
 ```
 
-API responses explicitly select public fields; password/reset hashes stay server-side. Property and viewing permissions are checked at the API, independently of UI visibility. Active appointments use a unique property/time slot key; cancellation removes the key to free the slot. ISO timestamps are normalized before generating this key. Password resets consume a hashed token atomically and increment a session version.
+I select public fields explicitly in API responses and keep password/reset hashes on the server. I enforce property and viewing permissions in the API, independently of what the UI displays. I reserve active appointments with a unique property/time slot key, normalize ISO timestamps before generating it, and remove the key on cancellation. I consume reset tokens atomically and increment the account's session version.
 
-MongoDB queries perform property filtering, sorting, counting and pagination. Demo storage implements the corresponding limited query semantics and serializes writes to a persistent JSON file. It is for a single local process, never production. Mongoose initializes the unique email and active-slot indexes before the server starts.
+I run property filtering, sorting, counting and pagination in MongoDB. For local demonstrations, I implement the corresponding query behavior over a persistent JSON file with serialized writes. I limit that adapter to one local process and forbid it in production. I initialize unique email and active-slot indexes before starting the server.
 
-Images are accepted only as JPEG, PNG or WebP, decoded and re-encoded, resized to fit 1920×1440, and stripped of original metadata. The API stores only server-generated image identifiers and URLs. Optimistic checks reject conflicting image modifications and attempt cleanup if an upload fails partway through.
+I accept JPEG, PNG and WebP images, up to four photos and 4 MB per file. I decode, resize to fit 1920×1440, re-encode and strip the original metadata through Sharp. I store server-generated image identifiers and URLs, reject conflicting image updates and attempt cleanup after partial upload failures. I send one image per browser request to fit Vercel's payload limit.
 
-The frontend uses reusable cards, forms, notices, loading and empty states. Main pages are lazy-loaded. Form labels, semantic navigation, keyboard focus styles and a mobile menu support accessible interaction. All viewing timestamps are labelled IST.
+I built reusable cards, forms, notices, loading states and empty states. I lazy-load the main pages, label all viewing times in IST, and include form labels, semantic navigation, focus styles and a mobile menu.

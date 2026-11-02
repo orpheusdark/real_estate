@@ -1,24 +1,25 @@
-# Validation record
+# My validation record
 
-EstateIQ is live at https://estateiq-rho-ten.vercel.app . These results distinguish real service checks from isolated test coverage.
+I deployed EstateIQ at https://estateiq-rho-ten.vercel.app . I distinguish the live service checks I performed from my isolated automated tests.
 
-## Passed locally and in automation
+## What I verified locally and in automation
 
-- `npm test`: 24 API/catalog tests, covering accounts, password hashing and reset tokens, session revocation, ownership and mass assignment, image limits and invalid files, property filters and pagination, guest/user appointments, slot conflicts, status permissions, cancellations, headers/CORS, rate limits, archival, persistent demo storage, gallery assets, safe seeding, Vercel route metadata and read-only startup fallback.
-- `npm run build`: strict TypeScript, SEO generation and optimized Vite output.
-- The real Mongoose adapter's API suite passed on GitHub Actions using an isolated MongoDB process. This is separate from the later Atlas verification below.
-- Local Chrome demo checks passed registration, listings, image upload, dashboard, guest viewing and cancellation; separate checks covered empty results, protected-route redirects, missing pages and responsive layouts.
+- I passed 24 tests with `npm test`, covering accounts, password hashing/reset tokens, session revocation, ownership, mass assignment, image validation/limits, filters, pagination, appointments, slot conflicts, status permissions, cancellation, headers/CORS, rate limits, archival, demo persistence, gallery assets, safe seeding, Vercel routing metadata and startup fallback.
+- I passed `npm run build`, including strict TypeScript, SEO generation and optimized Vite output.
+- I verified the real Mongoose adapter's API suite on GitHub Actions with an isolated MongoDB process, separately from my later Atlas checks.
+- I checked registration, listings, uploads, dashboard, guest viewing and cancellation in local Chrome demo mode. I also checked empty results, protected-route redirects, missing pages and responsive layouts.
 
-## Verified against real services
+## What I verified against real services
 
-- MongoDB Atlas connection and ping passed after password formatting and network access were corrected. The 18 illustrative homes were seeded under the owner account.
-- Gmail SMTP connection and authentication passed. No email was sent.
-- ImageKit credentials passed, then the live Vercel property editor successfully uploaded four actual images and displayed them in its gallery.
-- Live Chrome passed property browsing, image loading, city/rent filtering, gallery selection, registration, cookie-session persistence after refresh, logout/login, listing creation, and mobile/tablet/desktop layouts with no page errors.
-- The temporary live test account, property and ImageKit images were removed after verification.
+- I connected to MongoDB Atlas and passed a database ping after correcting password formatting and network access. I seeded the 18 illustrative homes under my owner account.
+- I verified Gmail SMTP connection and authentication without sending an email.
+- I verified the ImageKit key, then uploaded four actual images through the live property editor and displayed them in its gallery.
+- I checked live browsing, image loading, city/rent filtering, gallery selection, registration, cookie persistence after refresh, logout/login, property creation and mobile/tablet/desktop layouts in Chrome. I observed no browser page errors.
+- I removed my temporary live test account, property and ImageKit images after verification.
+- I checked that the published sitemap returns actual database property IDs and that both the local and live APIs report connected mode.
 
-## Explicitly not tested
+## What I have not verified live
 
-Email delivery, reset-link delivery and live viewing submission were skipped because the user asked to skip email. These flows have automated local API coverage, which is not a claim that production email delivery was tested.
+I chose to skip sending email during setup. I therefore have not tested production email delivery, reset-link delivery or live viewing submission. I covered the reset and appointment flows in local API tests, but I do not treat that as proof of live email delivery.
 
-The local booking smoke script refuses to run unless the API reports demo mode, preventing it from sending test bookings through real email services. Production startup failures expose a labelled read-only sample catalog; write requests are rejected until services reconnect.
+I added a guard that stops the local booking smoke script unless the API reports demo mode. I also added an explicit read-only sample catalog for production startup failures, rejecting writes until the live services reconnect.

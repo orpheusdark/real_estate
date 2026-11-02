@@ -1,11 +1,11 @@
-# Image credits
+# My image credits
 
-Local demo listings and the home/account pages use interior and architecture photographs sourced from Unsplash (`images.unsplash.com`) and served as optimized local WebP assets. They are illustrative sample images, not photographs of verified properties for sale.
+I sourced interior and architecture photographs from Unsplash (`images.unsplash.com`) and optimized them into local WebP assets for the home/account pages and sample listings. I use these as illustrative images, not as verified photographs of properties offered for sale.
 
-Photo identifiers: `photo-1600585154340-be6161a56a0c`, `photo-1600607687939-ce8a6c25118c`, `photo-1600566753086-00f18fb6b3ea`, `photo-1600047509807-ba8f99d2cdde`, `photo-1600210492486-724fe5c67fb0`, `photo-1600607687920-4e2a09cf159d`.
+I initially used these source identifiers: `photo-1600585154340-be6161a56a0c`, `photo-1600607687939-ce8a6c25118c`, `photo-1600566753086-00f18fb6b3ea`, `photo-1600047509807-ba8f99d2cdde`, `photo-1600210492486-724fe5c67fb0` and `photo-1600607687920-4e2a09cf159d`.
 
-EstateIQ's favicon, placeholder house graphic and decorative line illustration are project-created SVGs. Real property owners upload their own authorized photographs; the server validates and stores them in ImageKit when connected, or locally in demo mode.
+I created the favicon, placeholder house graphic and decorative line illustration as SVG assets. For real user listings, I accept authorized owner-uploaded photographs and validate them before storing them in ImageKit, or locally in demo mode.
 
-## Expanded sample collection
+## How I expanded the sample collection
 
-The 18 illustrative homes each have three gallery photos, drawn from 12 optimized local WebP images in `frontend/public/images/homes/`. The exact Unsplash source identifiers and file names are recorded in `scripts/photo-manifest.json`. These photos are examples of home styles and are not presented as verified photographs of listed addresses.
+I added 18 illustrative homes with three gallery photos each, using 12 optimized WebP assets in `frontend/public/images/homes/`. I recorded the full list of Unsplash source identifiers and local filenames in `scripts/photo-manifest.json`. I label the photos and prices as examples rather than verified property offers.
