@@ -7,7 +7,7 @@ export function publicAppointment(a){const {_id,propertyId,propertyTitle,ownerId
 export function appointmentRouter(store,auth,mail,config){
  const router=Router();
  const book=async(req,res)=>{
-  const data=parse(booking,req.body);const p=await store.one('properties',{_id:req.params.id,archived:false});if(!p)fail(404,'Property not found');if(p.ownerId===req.user?._id)fail(400,'You cannot book your own property');
+  const data=parse(booking,req.body);data.startsAt=new Date(data.startsAt).toISOString();const p=await store.one('properties',{_id:req.params.id,archived:false});if(!p)fail(404,'Property not found');if(p.ownerId===req.user?._id)fail(400,'You cannot book your own property');
   const token=randomBytes(32).toString('hex');
   const a=await store.create('appointments',{...data,propertyId:p._id,propertyTitle:p.title,ownerId:p.ownerId,userId:req.user?._id||null,status:'pending',slotKey:`${p._id}:${data.startsAt}`,cancelHash:hashToken(token)});
   let emailSent=true;
