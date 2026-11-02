@@ -11,3 +11,7 @@ playwright-report/
 test-results/
 *.log
 *.tsbuildinfo
+
+.vercel/
+.vercel
+.env*

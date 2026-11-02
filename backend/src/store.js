@@ -4,7 +4,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { models } from './models.js';
 const clone = (x) => JSON.parse(JSON.stringify(x));
-function matches(row, query) {
+export function matches(row, query) {
   return Object.entries(query).every(([key, value]) => {
     if (key === '$or') return value.some((q) => matches(row, q));
     if (value && typeof value === 'object')

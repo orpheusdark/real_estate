@@ -11,9 +11,10 @@ import {
 } from 'react-router-dom';
 import { House, ArrowUpRight, Menu, X } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth';
-import { api, errorMessage } from './api';
+import { errorMessage } from './api';
 import { Loading, Seo } from './components';
 import './style.css';
+import { RuntimeProvider, useRuntime } from './runtime';
 const Home = lazy(() => import('./pages/Home'));
 const Browse = lazy(() => import('./pages/Browse'));
 const Detail = lazy(() => import('./pages/Detail'));
@@ -53,27 +54,26 @@ function Layout() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
-  const [demo, setDemo] = useState(false);
+  const mode = useRuntime();
   const loc = useLocation();
   useEffect(() => {
     setOpen(false);
     setError('');
     window.scrollTo(0, 0);
   }, [loc.pathname]);
-  useEffect(() => {
-    api
-      .get('/health')
-      .then((r) => setDemo(r.data.mode === 'demo'))
-      .catch(() => {});
-  }, []);
   return (
     <>
       <a className="skip" href="#main">
         Skip to content
       </a>
-      {demo && (
+      {mode === 'demo' && (
         <div className="demo-bar">
           Local demo · Sample properties · Emails saved to the local outbox
+        </div>
+      )}
+      {mode === 'showcase' && (
+        <div className="demo-bar">
+          Browsing preview · Illustrative homes · Accounts and viewings opening soon
         </div>
       )}
       <header>
@@ -203,9 +203,11 @@ function Layout() {
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <Layout />
-      </AuthProvider>
+      <RuntimeProvider>
+        <AuthProvider>
+          <Layout />
+        </AuthProvider>
+      </RuntimeProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

@@ -12,10 +12,12 @@ import {
   House,
 } from 'lucide-react';
 import { api, errorMessage, money, type Property } from '../api';
+import { useRuntime } from '../runtime';
 import { useAuth } from '../auth';
 import { Seo, Loading, Notice } from '../components';
 export default function Detail() {
   const { id } = useParams();
+  const mode = useRuntime();
   const { user } = useAuth();
   const [p, setP] = useState<Property>();
   const [error, setError] = useState('');
@@ -185,7 +187,20 @@ export default function Detail() {
           </div>
         </div>
         <aside className="booking-card">
-          {mine ? (
+          {mode === 'showcase' ? (
+            <>
+              <p className="eyebrow">A LOOK AT WHAT'S POSSIBLE</p>
+              <h2>Picture your next chapter.</h2>
+              <p className="muted">
+                Explore this sample home's photos and details. Viewing requests will open when live
+                services are connected.
+              </p>
+              <Link className="button dark full" to="/properties">
+                Discover more homes
+              </Link>
+              <p className="micro muted">Illustrative property. Photos and prices are samples.</p>
+            </>
+          ) : mine ? (
             <>
               <p className="eyebrow">YOUR PROPERTY</p>
               <h2>Ready for its next chapter.</h2>

@@ -20,5 +20,6 @@
     "concurrently": "^9.2.0",
     "mongodb-memory-server-core": "^11.3.0",
     "prettier": "^3.9.10"
-  }
+  },
+  "type": "module"
 }

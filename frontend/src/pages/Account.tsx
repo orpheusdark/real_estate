@@ -1,11 +1,13 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { useRuntime } from '../runtime';
 import { useAuth } from '../auth';
 import { api, errorMessage } from '../api';
 import { Seo, Notice } from '../components';
 export default function Account() {
   const { pathname } = useLocation();
+  const runtime = useRuntime();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { setUser } = useAuth();
@@ -71,10 +73,7 @@ export default function Account() {
           A place to begin.
           <br />A space to belong.
         </h2>
-        <img
-          src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80"
-          alt="A comfortable bright living room"
-        />
+        <img src="/images/homes/home-05.webp" alt="A comfortable bright living room" />
         <span>
           <ShieldCheck size={18} /> Your home search, all in one place.
         </span>
@@ -102,50 +101,57 @@ export default function Account() {
             )}
           </div>
         )}
-        <form key={mode} onSubmit={submit}>
-          {registration && (
-            <label>
-              Your name
-              <input name="name" required minLength={2} maxLength={80} autoComplete="name" />
-            </label>
-          )}
-          {!reset && (
-            <label>
-              Email address
-              <input name="email" type="email" required autoComplete="email" maxLength={254} />
-            </label>
-          )}
-          {!forgot && (
-            <label>
-              Password
-              <input
-                name="password"
-                type="password"
-                required
-                minLength={registration || reset ? 10 : 1}
-                maxLength={72}
-                autoComplete={registration || reset ? 'new-password' : 'current-password'}
-              />
-            </label>
-          )}
-          {!registration && !forgot && !reset && (
-            <Link className="forgot-link" to="/forgot-password">
-              Forgot your password?
-            </Link>
-          )}
-          <button className="button dark full" disabled={busy}>
-            {busy
-              ? 'Please wait…'
-              : forgot
-                ? 'Send reset link'
-                : reset
-                  ? 'Update password'
-                  : registration
-                    ? 'Create account'
-                    : 'Sign in'}
-            <ArrowRight size={18} />
-          </button>
-        </form>
+        {runtime === 'showcase' ? (
+          <Notice>
+            This is a browsing preview. Accounts and property submissions will open when live
+            services are connected. <Link to="/properties">Explore the sample homes →</Link>
+          </Notice>
+        ) : (
+          <form key={mode} onSubmit={submit}>
+            {registration && (
+              <label>
+                Your name
+                <input name="name" required minLength={2} maxLength={80} autoComplete="name" />
+              </label>
+            )}
+            {!reset && (
+              <label>
+                Email address
+                <input name="email" type="email" required autoComplete="email" maxLength={254} />
+              </label>
+            )}
+            {!forgot && (
+              <label>
+                Password
+                <input
+                  name="password"
+                  type="password"
+                  required
+                  minLength={registration || reset ? 10 : 1}
+                  maxLength={72}
+                  autoComplete={registration || reset ? 'new-password' : 'current-password'}
+                />
+              </label>
+            )}
+            {!registration && !forgot && !reset && (
+              <Link className="forgot-link" to="/forgot-password">
+                Forgot your password?
+              </Link>
+            )}
+            <button className="button dark full" disabled={busy}>
+              {busy
+                ? 'Please wait…'
+                : forgot
+                  ? 'Send reset link'
+                  : reset
+                    ? 'Update password'
+                    : registration
+                      ? 'Create account'
+                      : 'Sign in'}
+              <ArrowRight size={18} />
+            </button>
+          </form>
+        )}
         <p className="account-switch">
           {registration ? (
             <>

@@ -5,6 +5,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "/api/server?__route=:path*"
+    },
+    {
       "source": "/((?!assets/|favicon.svg|robots.txt|sitemap.xml).*)",
       "destination": "/index.html"
     }
@@ -35,5 +39,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/server.js": {
+      "maxDuration": 30
+    }
+  }
 }

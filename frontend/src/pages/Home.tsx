@@ -67,7 +67,7 @@ export default function Home() {
         </div>
         <div className="hero-visual">
           <img
-            src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85"
+            src="/images/homes/home-06.webp"
             alt="Sunlit modern living room opening onto a garden"
             fetchPriority="high"
           />
