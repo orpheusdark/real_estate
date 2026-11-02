@@ -73,3 +73,23 @@ test('demo refresh preserves unrelated user listings and is idempotent', async (
   assert.equal(tables.properties.length, 19);
   assert.deepEqual(tables.properties[0], unrelated);
 });
+
+test('serverless adapter removes internal routing metadata before filtering', async () => {
+  const { default: handler } = await import('../../api/server.js');
+  const http = await import('node:http');
+  const server = http.createServer((req, res) => {
+    Object.defineProperty(req, 'query', {
+      configurable: true,
+      value: { __route: 'properties', location: 'Mumbai' },
+    });
+    req.url = '/api/server?__route=properties&location=Mumbai';
+    handler(req, res);
+  });
+  try {
+    const r = await request(server).get('/api/properties?location=Mumbai').expect(200);
+    assert.equal(r.body.total, 1);
+    assert.equal(r.body.items[0].location, 'Mumbai');
+  } finally {
+    server.close();
+  }
+});

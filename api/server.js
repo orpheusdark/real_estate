@@ -9,6 +9,13 @@ export default function handler(req, res) {
     String(route) +
     (original.searchParams.size ? '?' + original.searchParams.toString() : '');
   // Let Express derive query values from the restored application URL.
-  delete req.query;
+  const query = { ...req.query };
+  delete query.__route;
+  Object.defineProperty(req, 'query', {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    value: query,
+  });
   return app(req, res);
 }
