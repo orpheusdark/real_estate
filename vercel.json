@@ -5,6 +5,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/server?__route=sitemap.xml"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/server?__route=:path*"
     },
@@ -42,7 +46,7 @@
   ],
   "functions": {
     "api/server.js": {
-      "maxDuration": 30
+      "maxDuration": 60
     }
   }
 }

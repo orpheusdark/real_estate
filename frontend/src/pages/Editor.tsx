@@ -55,10 +55,12 @@ export default function Editor() {
       setSaved(true);
       if (!p) throw new Error('Could not save the listing');
       if (files.length) {
-        const upload = new FormData();
-        files.forEach((file) => upload.append('images', file));
-        p = (await api.post(`/properties/${p.id}/images`, upload)).data;
-        setProperty(p);
+        for (const file of files) {
+          const upload = new FormData();
+          upload.append('images', file);
+          p = (await api.post(`/properties/${p!.id}/images`, upload)).data;
+          setProperty(p);
+        }
         setFiles([]);
       }
       navigate('/properties/' + p!.id);
@@ -243,7 +245,7 @@ export default function Editor() {
           <section>
             <span className="form-number">03</span>
             <h2>Let the space speak</h2>
-            <p className="muted">Up to four photos. JPEG, PNG or WebP, maximum 5 MB each.</p>
+            <p className="muted">Up to four photos. JPEG, PNG or WebP, maximum 4 MB each.</p>
             <div className="editor-images">
               {property?.images.map((im) => (
                 <div key={im.fileId}>
@@ -287,8 +289,8 @@ export default function Editor() {
                     setError('Choose up to four images in total.');
                     return;
                   }
-                  if (selected.some((f) => f.size > 5 * 1024 * 1024)) {
-                    setError('Each image must be 5 MB or smaller.');
+                  if (selected.some((f) => f.size > 4 * 1024 * 1024)) {
+                    setError('Each image must be 4 MB or smaller.');
                     return;
                   }
                   setError('');

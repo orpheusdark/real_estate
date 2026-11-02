@@ -133,7 +133,7 @@ export function propertyRouter(store, auth, images) {
     res.json({ message: 'Listing removed and viewings cancelled' });
   });
   router.post('/:id/images', auth.authenticate, owned, upload, async (req, res) => {
-    if (!req.files?.length) fail(400, 'Choose JPEG, PNG or WebP images, up to 5 MB each');
+    if (!req.files?.length) fail(400, 'Choose JPEG, PNG or WebP images, up to 4 MB each');
     if (req.property.images.length + req.files.length > 4)
       fail(400, 'A property can have up to four images');
     const saved = [];

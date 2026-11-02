@@ -1,6 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
-import { rateLimit } from 'express-rate-limit';
+import { rateLimit, ipKeyGenerator } from 'express-rate-limit';
 import samples from '../../shared/sample-properties.json' with { type: 'json' };
 import { propertyRouter } from './properties.js';
 import { matches } from './store.js';
@@ -21,6 +21,7 @@ export function createCatalogApp() {
       limit: 120,
       standardHeaders: 'draft-8',
       legacyHeaders: false,
+      keyGenerator: (req) => ipKeyGenerator(req.ip),
       validate: { xForwardedForHeader: false },
     }),
   );

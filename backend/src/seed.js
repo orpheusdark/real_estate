@@ -10,10 +10,13 @@ export async function seedDemo(store) {
       passwordHash: await bcrypt.hash('ExploreEstate2026!', 12),
       tokenVersion: 0,
     });
-  const existing = await store.find('properties', { ownerId: owner._id });
+  return seedSampleProperties(store, owner._id);
+}
+export async function seedSampleProperties(store, ownerId) {
+  const existing = await store.find('properties', { ownerId });
   for (const sample of samples) {
     const { id, createdAt, ...fields } = sample;
-    const data = { ...fields, ownerId: owner._id };
+    const data = { ...fields, ownerId };
     const old = existing.find((p) => p.sampleKey === sample.sampleKey || p.title === sample.title);
     if (old) {
       if (old.archived) continue;

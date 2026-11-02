@@ -5,7 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { rateLimit } from 'express-rate-limit';
+import { rateLimit, ipKeyGenerator } from 'express-rate-limit';
 import { authTools, authRouter, publicUser } from './auth.js';
 import { propertyRouter, publicProperty } from './properties.js';
 import { appointmentRouter, publicAppointment } from './appointments.js';
@@ -57,6 +57,7 @@ export function createApp(store, config) {
       limit,
       standardHeaders: 'draft-8',
       legacyHeaders: false,
+      keyGenerator: (req) => ipKeyGenerator(req.ip),
       message: { message: 'Too many requests. Please try again later.' },
     });
   app.use('/api', limiter(300));
@@ -175,7 +176,7 @@ export function createApp(store, config) {
     }
     if (err.name === 'MulterError') {
       status = 400;
-      message = 'Upload up to four images, maximum 5 MB each';
+      message = 'Upload up to four images, maximum 4 MB each';
     }
     if (status >= 500) {
       console.error('Request failed:', err.name);

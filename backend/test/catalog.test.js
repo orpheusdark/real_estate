@@ -80,7 +80,7 @@ test('serverless adapter removes internal routing metadata before filtering', as
   const server = http.createServer((req, res) => {
     Object.defineProperty(req, 'query', {
       configurable: true,
-      value: { __route: 'properties', location: 'Mumbai' },
+      value: { __route: 'properties', path: 'properties', location: 'Mumbai' },
     });
     req.url = '/api/server?__route=properties&location=Mumbai';
     handler(req, res);

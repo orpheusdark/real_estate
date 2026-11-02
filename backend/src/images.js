@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fail } from './validation.js';
 export const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024, files: 4, fields: 0 },
+  limits: { fileSize: 4 * 1024 * 1024, files: 4, fields: 0 },
   fileFilter: (req, file, cb) =>
     ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)
       ? cb(null, true)
