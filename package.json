@@ -13,7 +13,8 @@
     "start": "npm run start -w backend",
     "format": "prettier --write .",
     "test:browser": "npm run test:browser -w frontend",
-    "test:mongo": "node scripts/test-mongo.mjs"
+    "test:mongo": "node scripts/test-mongo.mjs",
+    "services:check": "node --env-file-if-exists=backend/.env scripts/check-services.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
