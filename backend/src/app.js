@@ -16,7 +16,20 @@ export function createApp(store, config) {
   const app = express();
   app.disable('x-powered-by');
   if (config.trustProxy) app.set('trust proxy', 1);
-  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' },contentSecurityPolicy:{directives:{imgSrc:["'self'",'https:','data:','blob:'],scriptSrc:["'self'"],connectSrc:["'self'"],objectSrc:["'none'"],upgradeInsecureRequests:config.production?[]:null}} }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: {
+        directives: {
+          imgSrc: ["'self'", 'https:', 'data:', 'blob:'],
+          scriptSrc: ["'self'"],
+          connectSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          upgradeInsecureRequests: config.production ? [] : null,
+        },
+      },
+    }),
+  );
   const origins = new Set([
     config.frontend,
     ...(config.demo ? ['http://127.0.0.1:5173', 'http://localhost:5173'] : []),
