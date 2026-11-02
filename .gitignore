@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+!.env.test.example
+backend/data/
+backend/uploads/
+coverage/
+playwright-report/
+test-results/
+*.log
