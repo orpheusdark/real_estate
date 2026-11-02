@@ -47,7 +47,7 @@ Viewings are one-hour slots starting on the hour from 9am to 6pm **IST**, at lea
 npm test                  # Full API, catalog, seeding and serverless adapter tests
 npm run check             # Strict frontend TypeScript
 npm run build             # SEO files, TypeScript and production bundles
-npm run test:browser       # Chrome smoke flow; run npm run dev in another terminal first
+npm run test:browser       # Local demo only; requires DEMO_MODE=true and npm run dev
 npm run test:mongo         # Same API suite against an isolated MongoDB process
 npm audit
 ```

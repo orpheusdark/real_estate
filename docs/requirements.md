@@ -10,7 +10,7 @@ Based on the supplied nine-page Sapphire IQ RealEstate Platform student guide. T
 | 4. Production   | Helmet, CORS allowlist, origin checks, rate limits, SEO tags, robots and sitemap, deep links, Render and Vercel configuration, environment validation and deployment instructions                              |
 | 5. Optional AI  | Not implemented; the four core modules run independently of AI services                                                                                                                                        |
 
-The platform is built and locally verified. Account provisioning, real external-service validation, and actual deployment are remaining configuration work; deployment files do not mean the site is live.
+The full platform is deployed on Vercel with Atlas, ImageKit and Gmail SMTP configured. Live account, cookie-session and ImageKit upload checks passed. Email delivery and live viewing submission remain untested at the user’s request; see the validation record.
 
 ## Architecture
 

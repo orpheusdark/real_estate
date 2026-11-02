@@ -8,6 +8,14 @@ const browser = await chromium.launch({
   headless: true,
 });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+const health = await page.request.get('http://127.0.0.1:5173/api/health');
+if (!health.ok() || (await health.json()).mode !== 'demo') {
+  await browser.close();
+  throw new Error(
+    'This booking smoke test requires local DEMO_MODE=true. Refusing to submit test bookings to connected email services.',
+  );
+}
+
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 await mkdir('../docs/screenshots', { recursive: true });
