@@ -18,6 +18,7 @@ const property = new Schema(
   {
     ...base,
     ownerId: { type: String, index: true },
+    sampleKey: { type: String, index: true },
     title: String,
     description: String,
     location: String,

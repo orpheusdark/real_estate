@@ -1,118 +1,34 @@
 import bcrypt from 'bcryptjs';
+import samples from '../../shared/sample-properties.json' with { type: 'json' };
+// Refresh only illustrative listings owned by the dedicated local demo account.
 export async function seedDemo(store) {
-  if ((await store.find('users')).length) return;
-  const u = await store.create('users', {
-    name: 'EstateIQ Demo',
-    email: 'demo@estateiq.local',
-    passwordHash: await bcrypt.hash('ExploreEstate2026!', 12),
-    tokenVersion: 0,
-  });
-  const homes = [
-    [
-      'The Palm Residence',
-      'Bengaluru',
-      'Indiranagar, Bengaluru',
-      'Apartment',
-      'Buy',
-      18500000,
-      1850,
-      3,
-      3,
-      'photo-1600585154340-be6161a56a0c',
-    ],
-    [
-      'A quieter kind of city living',
-      'Pune',
-      'Baner, Pune',
-      'Villa',
-      'Buy',
-      24500000,
-      2800,
-      4,
-      4,
-      'photo-1600607687939-ce8a6c25118c',
-    ],
-    [
-      'Light-filled home in the city',
-      'Hyderabad',
-      'Gachibowli, Hyderabad',
-      'Apartment',
-      'Rent',
-      45000,
-      1450,
-      2,
-      2,
-      'photo-1600566753086-00f18fb6b3ea',
-    ],
-    [
-      'The Courtyard House',
-      'Bengaluru',
-      'Whitefield, Bengaluru',
-      'Independent house',
-      'Buy',
-      32000000,
-      3200,
-      4,
-      4,
-      'photo-1600047509807-ba8f99d2cdde',
-    ],
-    [
-      'Room to slow down',
-      'Mumbai',
-      'Powai, Mumbai',
-      'Apartment',
-      'Rent',
-      85000,
-      1200,
-      2,
-      2,
-      'photo-1600210492486-724fe5c67fb0',
-    ],
-    [
-      'A fresh start at Green Park',
-      'New Delhi',
-      'Green Park, New Delhi',
-      'Apartment',
-      'Buy',
-      21000000,
-      1600,
-      3,
-      2,
-      'photo-1600607687920-4e2a09cf159d',
-    ],
-  ];
-  for (const [
-    title,
-    location,
-    address,
-    type,
-    purpose,
-    price,
-    area,
-    bedrooms,
-    bathrooms,
-    photo,
-  ] of homes)
-    await store.create('properties', {
-      ownerId: u._id,
-      title,
-      location,
-      address,
-      type,
-      purpose,
-      price,
-      area,
-      bedrooms,
-      bathrooms,
-      description:
-        'A thoughtfully designed home with generous natural light, open living spaces, and convenient access to the neighbourhood. Explore the gallery and request a viewing to see whether this could be your next chapter. This is a sample listing for local demonstration.',
-      amenities: ['Parking', 'Balcony', 'Security', 'Power backup'],
-      images: [
-        {
-          url: `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=1400&q=85`,
-          fileId: `seed-${photo}`,
-        },
-      ],
-      archived: false,
+  let owner = await store.one('users', { email: 'demo@estateiq.local' });
+  if (!owner)
+    owner = await store.create('users', {
+      name: 'EstateIQ Demo',
+      email: 'demo@estateiq.local',
+      passwordHash: await bcrypt.hash('ExploreEstate2026!', 12),
+      tokenVersion: 0,
     });
+  const existing = await store.find('properties', { ownerId: owner._id });
+  for (const sample of samples) {
+    const { id, createdAt, ...fields } = sample;
+    const data = { ...fields, ownerId: owner._id };
+    const old = existing.find((p) => p.sampleKey === sample.sampleKey || p.title === sample.title);
+    if (old) {
+      if (old.archived) continue;
+      const patch = {
+        description: data.description,
+        images: data.images,
+        amenities: data.amenities,
+        sampleKey: data.sampleKey,
+      };
+      if (
+        JSON.stringify(old.images) !== JSON.stringify(patch.images) ||
+        old.description !== patch.description ||
+        old.sampleKey !== sample.sampleKey
+      )
+        await store.update('properties', { _id: old._id }, patch);
+    } else await store.create('properties', { ...data, archived: false });
+  }
 }

@@ -1,0 +1,560 @@
+[
+  {
+    "sampleKey": "palm-residence",
+    "id": "abd58e3a-5d01-5a28-9d72-cc0ec897570d",
+    "ownerId": "estateiq-sample-owner",
+    "title": "The Palm Residence",
+    "description": "A generous wraparound balcony and open living-dining area create an easy rhythm for everyday life. Set on a quiet residential lane, this home is close to neighbourhood cafes, shops and the metro. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Bengaluru",
+    "address": "Indiranagar, Bengaluru",
+    "type": "Apartment",
+    "purpose": "Buy",
+    "price": 18500000,
+    "area": 1850,
+    "bedrooms": 3,
+    "bathrooms": 3,
+    "amenities": ["Balcony", "Parking", "Security", "Power backup"],
+    "images": [
+      {
+        "url": "/images/homes/home-01.webp",
+        "fileId": "seed-palm-residence-0"
+      },
+      {
+        "url": "/images/homes/home-03.webp",
+        "fileId": "seed-palm-residence-1"
+      },
+      {
+        "url": "/images/homes/home-06.webp",
+        "fileId": "seed-palm-residence-2"
+      }
+    ],
+    "createdAt": "2026-11-01T03:00:00.000Z"
+  },
+  {
+    "sampleKey": "pune-villa",
+    "id": "6c35d0fe-0fb9-5857-866b-f7695ff10d7e",
+    "ownerId": "estateiq-sample-owner",
+    "title": "A quieter kind of city living",
+    "description": "A contemporary villa with a private garden, a flexible family lounge and plenty of daylight. The ground floor opens to an outdoor seating area, while upstairs bedrooms offer space for work, rest and a growing family. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Pune",
+    "address": "Baner, Pune",
+    "type": "Villa",
+    "purpose": "Buy",
+    "price": 24500000,
+    "area": 2800,
+    "bedrooms": 4,
+    "bathrooms": 4,
+    "amenities": ["Private garden", "Parking", "Balcony", "Study"],
+    "images": [
+      {
+        "url": "/images/homes/home-02.webp",
+        "fileId": "seed-pune-villa-0"
+      },
+      {
+        "url": "/images/homes/home-04.webp",
+        "fileId": "seed-pune-villa-1"
+      },
+      {
+        "url": "/images/homes/home-07.webp",
+        "fileId": "seed-pune-villa-2"
+      }
+    ],
+    "createdAt": "2026-11-01T04:00:00.000Z"
+  },
+  {
+    "sampleKey": "hyderabad-light",
+    "id": "d12fab22-15eb-5a6b-a779-e4b5676bf997",
+    "ownerId": "estateiq-sample-owner",
+    "title": "Light-filled home in the city",
+    "description": "An airy apartment with a practical layout, a sunny living room and a covered balcony. The neighbourhood offers convenient access to the financial district, daily essentials and weekend dining. Monthly rent shown is illustrative. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Hyderabad",
+    "address": "Gachibowli, Hyderabad",
+    "type": "Apartment",
+    "purpose": "Rent",
+    "price": 45000,
+    "area": 1450,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "amenities": ["Balcony", "Lift", "Security", "Power backup"],
+    "images": [
+      {
+        "url": "/images/homes/home-03.webp",
+        "fileId": "seed-hyderabad-light-0"
+      },
+      {
+        "url": "/images/homes/home-05.webp",
+        "fileId": "seed-hyderabad-light-1"
+      },
+      {
+        "url": "/images/homes/home-08.webp",
+        "fileId": "seed-hyderabad-light-2"
+      }
+    ],
+    "createdAt": "2026-11-01T05:00:00.000Z"
+  },
+  {
+    "sampleKey": "courtyard",
+    "id": "ac1a4eca-1693-5036-ade8-a0c12d30b670",
+    "ownerId": "estateiq-sample-owner",
+    "title": "The Courtyard House",
+    "description": "Built around a welcoming courtyard, this independent home gives each room a connection to the outdoors. Spacious bedrooms, a separate study and a garden-facing dining area make it a relaxed setting for everyday family life. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Bengaluru",
+    "address": "Whitefield, Bengaluru",
+    "type": "Independent house",
+    "purpose": "Buy",
+    "price": 32000000,
+    "area": 3200,
+    "bedrooms": 4,
+    "bathrooms": 4,
+    "amenities": ["Courtyard", "Private garden", "Study", "Parking"],
+    "images": [
+      {
+        "url": "/images/homes/home-04.webp",
+        "fileId": "seed-courtyard-0"
+      },
+      {
+        "url": "/images/homes/home-06.webp",
+        "fileId": "seed-courtyard-1"
+      },
+      {
+        "url": "/images/homes/home-09.webp",
+        "fileId": "seed-courtyard-2"
+      }
+    ],
+    "createdAt": "2026-11-01T06:00:00.000Z"
+  },
+  {
+    "sampleKey": "powai",
+    "id": "3310a80e-a225-57a6-9ebe-81a5f48a950d",
+    "ownerId": "estateiq-sample-owner",
+    "title": "Room to slow down",
+    "description": "A thoughtfully arranged urban apartment with a cosy lounge, bright bedrooms and a balcony for quieter evenings. The location puts local parks, restaurants and daily shopping within easy reach. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Mumbai",
+    "address": "Powai, Mumbai",
+    "type": "Apartment",
+    "purpose": "Rent",
+    "price": 85000,
+    "area": 1200,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "amenities": ["Balcony", "Lift", "Security", "Gym"],
+    "images": [
+      {
+        "url": "/images/homes/home-05.webp",
+        "fileId": "seed-powai-0"
+      },
+      {
+        "url": "/images/homes/home-07.webp",
+        "fileId": "seed-powai-1"
+      },
+      {
+        "url": "/images/homes/home-10.webp",
+        "fileId": "seed-powai-2"
+      }
+    ],
+    "createdAt": "2026-11-01T07:00:00.000Z"
+  },
+  {
+    "sampleKey": "green-park",
+    "id": "42089126-c280-5255-9b9c-f191d7827dba",
+    "ownerId": "estateiq-sample-owner",
+    "title": "A fresh start at Green Park",
+    "description": "A bright residence with an open entertaining space and comfortable private rooms. Mature neighbourhood streets and nearby markets offer the convenience of city life with a more settled residential feel. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "New Delhi",
+    "address": "Green Park, New Delhi",
+    "type": "Apartment",
+    "purpose": "Buy",
+    "price": 21000000,
+    "area": 1600,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "amenities": ["Balcony", "Parking", "Lift", "Security"],
+    "images": [
+      {
+        "url": "/images/homes/home-06.webp",
+        "fileId": "seed-green-park-0"
+      },
+      {
+        "url": "/images/homes/home-08.webp",
+        "fileId": "seed-green-park-1"
+      },
+      {
+        "url": "/images/homes/home-11.webp",
+        "fileId": "seed-green-park-2"
+      }
+    ],
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "sampleKey": "vadodara-garden",
+    "id": "b9ec9e78-41d0-561b-90d8-1df5cb4127f3",
+    "ownerId": "estateiq-sample-owner",
+    "title": "The Garden Veranda",
+    "description": "A garden-side villa with a shaded veranda, separate dining room and an upstairs family nook. Its generous indoor-outdoor spaces suit slow mornings, family gatherings and a little room to grow. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Vadodara",
+    "address": "Bhayli, Vadodara",
+    "type": "Villa",
+    "purpose": "Buy",
+    "price": 16500000,
+    "area": 2450,
+    "bedrooms": 3,
+    "bathrooms": 3,
+    "amenities": ["Private garden", "Veranda", "Parking", "Study"],
+    "images": [
+      {
+        "url": "/images/homes/home-07.webp",
+        "fileId": "seed-vadodara-garden-0"
+      },
+      {
+        "url": "/images/homes/home-09.webp",
+        "fileId": "seed-vadodara-garden-1"
+      },
+      {
+        "url": "/images/homes/home-12.webp",
+        "fileId": "seed-vadodara-garden-2"
+      }
+    ],
+    "createdAt": "2026-11-01T09:00:00.000Z"
+  },
+  {
+    "sampleKey": "ahmedabad-terrace",
+    "id": "de8e6f82-9091-5d8a-bd83-2c6f945ed6fd",
+    "ownerId": "estateiq-sample-owner",
+    "title": "A terrace above the city",
+    "description": "This spacious apartment pairs an open living area with a private terrace corner and well-separated bedrooms. A flexible additional room can become a home office, reading room or guest space. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Ahmedabad",
+    "address": "Satellite, Ahmedabad",
+    "type": "Apartment",
+    "purpose": "Buy",
+    "price": 11800000,
+    "area": 2050,
+    "bedrooms": 3,
+    "bathrooms": 3,
+    "amenities": ["Terrace", "Parking", "Lift", "Security"],
+    "images": [
+      {
+        "url": "/images/homes/home-08.webp",
+        "fileId": "seed-ahmedabad-terrace-0"
+      },
+      {
+        "url": "/images/homes/home-10.webp",
+        "fileId": "seed-ahmedabad-terrace-1"
+      },
+      {
+        "url": "/images/homes/home-01.webp",
+        "fileId": "seed-ahmedabad-terrace-2"
+      }
+    ],
+    "createdAt": "2026-11-01T10:00:00.000Z"
+  },
+  {
+    "sampleKey": "chennai-coastal",
+    "id": "93c0f86e-9c59-525d-a028-208600fdf5ea",
+    "ownerId": "estateiq-sample-owner",
+    "title": "Coastal light, city comforts",
+    "description": "Soft natural light and a calm interior palette give this city apartment a welcoming character. A practical kitchen, utility area and airy bedrooms support comfortable everyday living close to Adyar amenities. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Chennai",
+    "address": "Adyar, Chennai",
+    "type": "Apartment",
+    "purpose": "Rent",
+    "price": 38000,
+    "area": 1350,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "amenities": ["Balcony", "Utility room", "Lift", "Power backup"],
+    "images": [
+      {
+        "url": "/images/homes/home-09.webp",
+        "fileId": "seed-chennai-coastal-0"
+      },
+      {
+        "url": "/images/homes/home-11.webp",
+        "fileId": "seed-chennai-coastal-1"
+      },
+      {
+        "url": "/images/homes/home-02.webp",
+        "fileId": "seed-chennai-coastal-2"
+      }
+    ],
+    "createdAt": "2026-11-01T11:00:00.000Z"
+  },
+  {
+    "sampleKey": "goa-casa",
+    "id": "e32df3bd-e727-5ffd-a0ef-89f2cc0a119a",
+    "ownerId": "estateiq-sample-owner",
+    "title": "Casa do Sol",
+    "description": "An easygoing villa with a courtyard-style garden, open lounge and sheltered outdoor dining. Large windows and flexible gathering spaces make room for long weekends and everyday coastal living alike. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Goa",
+    "address": "Siolim, North Goa",
+    "type": "Villa",
+    "purpose": "Buy",
+    "price": 38500000,
+    "area": 3100,
+    "bedrooms": 4,
+    "bathrooms": 4,
+    "amenities": ["Private garden", "Outdoor dining", "Parking", "Balcony"],
+    "images": [
+      {
+        "url": "/images/homes/home-10.webp",
+        "fileId": "seed-goa-casa-0"
+      },
+      {
+        "url": "/images/homes/home-12.webp",
+        "fileId": "seed-goa-casa-1"
+      },
+      {
+        "url": "/images/homes/home-03.webp",
+        "fileId": "seed-goa-casa-2"
+      }
+    ],
+    "createdAt": "2026-11-01T12:00:00.000Z"
+  },
+  {
+    "sampleKey": "kochi-waterfront",
+    "id": "13870bcc-0642-56a9-a0ae-e45c07b33afb",
+    "ownerId": "estateiq-sample-owner",
+    "title": "A calmer view in Kochi",
+    "description": "A spacious apartment with a broad balcony, an open living-dining room and comfortable bedrooms. The surrounding waterfront neighbourhood offers walking routes, shopping and convenient city connections. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Kochi",
+    "address": "Marine Drive, Kochi",
+    "type": "Apartment",
+    "purpose": "Rent",
+    "price": 52000,
+    "area": 1720,
+    "bedrooms": 3,
+    "bathrooms": 3,
+    "amenities": ["Balcony", "Lift", "Security", "Parking"],
+    "images": [
+      {
+        "url": "/images/homes/home-11.webp",
+        "fileId": "seed-kochi-waterfront-0"
+      },
+      {
+        "url": "/images/homes/home-01.webp",
+        "fileId": "seed-kochi-waterfront-1"
+      },
+      {
+        "url": "/images/homes/home-04.webp",
+        "fileId": "seed-kochi-waterfront-2"
+      }
+    ],
+    "createdAt": "2026-11-01T13:00:00.000Z"
+  },
+  {
+    "sampleKey": "jaipur-rose",
+    "id": "6674411c-6ae7-5435-9d84-38878114c922",
+    "ownerId": "estateiq-sample-owner",
+    "title": "The Rosewood House",
+    "description": "A welcoming independent house with generous living spaces and a sunny upper terrace. The flexible ground-floor room works well as a guest bedroom or study, while the courtyard adds a quiet everyday retreat. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Jaipur",
+    "address": "Vaishali Nagar, Jaipur",
+    "type": "Independent house",
+    "purpose": "Buy",
+    "price": 14200000,
+    "area": 2300,
+    "bedrooms": 3,
+    "bathrooms": 3,
+    "amenities": ["Terrace", "Courtyard", "Parking", "Study"],
+    "images": [
+      {
+        "url": "/images/homes/home-12.webp",
+        "fileId": "seed-jaipur-rose-0"
+      },
+      {
+        "url": "/images/homes/home-02.webp",
+        "fileId": "seed-jaipur-rose-1"
+      },
+      {
+        "url": "/images/homes/home-05.webp",
+        "fileId": "seed-jaipur-rose-2"
+      }
+    ],
+    "createdAt": "2026-11-01T14:00:00.000Z"
+  },
+  {
+    "sampleKey": "gurugram-sky",
+    "id": "d062b509-37a8-5358-ab22-21969851b476",
+    "ownerId": "estateiq-sample-owner",
+    "title": "Skyline at Golf Course Road",
+    "description": "A generous apartment designed around an open entertaining area and a long covered balcony. Three private bedrooms and a separate work corner provide a comfortable balance of shared and personal space. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Gurugram",
+    "address": "Golf Course Road, Gurugram",
+    "type": "Apartment",
+    "purpose": "Buy",
+    "price": 29500000,
+    "area": 2250,
+    "bedrooms": 3,
+    "bathrooms": 4,
+    "amenities": ["Balcony", "Gym", "Security", "Parking"],
+    "images": [
+      {
+        "url": "/images/homes/home-03.webp",
+        "fileId": "seed-gurugram-sky-0"
+      },
+      {
+        "url": "/images/homes/home-05.webp",
+        "fileId": "seed-gurugram-sky-1"
+      },
+      {
+        "url": "/images/homes/home-08.webp",
+        "fileId": "seed-gurugram-sky-2"
+      }
+    ],
+    "createdAt": "2026-11-01T15:00:00.000Z"
+  },
+  {
+    "sampleKey": "noida-park",
+    "id": "06c11041-3f6d-548c-adc1-f9be1344dcb4",
+    "ownerId": "estateiq-sample-owner",
+    "title": "Parkside mornings",
+    "description": "A bright family apartment with a well-proportioned lounge, utility space and a balcony overlooking a green residential setting. The layout offers room to work from home without taking over the living area. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Noida",
+    "address": "Sector 150, Noida",
+    "type": "Apartment",
+    "purpose": "Rent",
+    "price": 32000,
+    "area": 1525,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "amenities": ["Balcony", "Lift", "Security", "Play area"],
+    "images": [
+      {
+        "url": "/images/homes/home-05.webp",
+        "fileId": "seed-noida-park-0"
+      },
+      {
+        "url": "/images/homes/home-07.webp",
+        "fileId": "seed-noida-park-1"
+      },
+      {
+        "url": "/images/homes/home-10.webp",
+        "fileId": "seed-noida-park-2"
+      }
+    ],
+    "createdAt": "2026-11-01T16:00:00.000Z"
+  },
+  {
+    "sampleKey": "surat-family",
+    "id": "b883a1aa-dee8-513a-8d2f-324fcd87b86e",
+    "ownerId": "estateiq-sample-owner",
+    "title": "A home for the whole family",
+    "description": "An open-plan apartment with a spacious kitchen, comfortable bedrooms and a flexible family living area. Thoughtful storage and a covered balcony help make everyday routines simple and relaxed. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Surat",
+    "address": "Vesu, Surat",
+    "type": "Apartment",
+    "purpose": "Buy",
+    "price": 9800000,
+    "area": 1980,
+    "bedrooms": 3,
+    "bathrooms": 3,
+    "amenities": ["Balcony", "Parking", "Lift", "Power backup"],
+    "images": [
+      {
+        "url": "/images/homes/home-08.webp",
+        "fileId": "seed-surat-family-0"
+      },
+      {
+        "url": "/images/homes/home-10.webp",
+        "fileId": "seed-surat-family-1"
+      },
+      {
+        "url": "/images/homes/home-01.webp",
+        "fileId": "seed-surat-family-2"
+      }
+    ],
+    "createdAt": "2026-11-01T17:00:00.000Z"
+  },
+  {
+    "sampleKey": "pune-studio",
+    "id": "3d1122fe-a144-5422-9765-0fb3623906ab",
+    "ownerId": "estateiq-sample-owner",
+    "title": "A little space of your own",
+    "description": "A compact, light-filled one-bedroom home with a separate bedroom, efficient kitchen and a small balcony. A useful first-home option in an established neighbourhood near everyday essentials. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Pune",
+    "address": "Kharadi, Pune",
+    "type": "Apartment",
+    "purpose": "Rent",
+    "price": 24000,
+    "area": 720,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "amenities": ["Balcony", "Lift", "Security", "Parking"],
+    "images": [
+      {
+        "url": "/images/homes/home-11.webp",
+        "fileId": "seed-pune-studio-0"
+      },
+      {
+        "url": "/images/homes/home-01.webp",
+        "fileId": "seed-pune-studio-1"
+      },
+      {
+        "url": "/images/homes/home-04.webp",
+        "fileId": "seed-pune-studio-2"
+      }
+    ],
+    "createdAt": "2026-11-01T18:00:00.000Z"
+  },
+  {
+    "sampleKey": "hyderabad-villa",
+    "id": "5fe1880c-6d9e-5ff5-b1fb-194ae9ee5d2f",
+    "ownerId": "estateiq-sample-owner",
+    "title": "The Olive Grove Villa",
+    "description": "A contemporary family villa with generous private and shared spaces, a garden-facing lounge and an upstairs terrace. A separate study and guest room bring flexibility to changing family routines. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Hyderabad",
+    "address": "Kokapet, Hyderabad",
+    "type": "Villa",
+    "purpose": "Buy",
+    "price": 42500000,
+    "area": 3650,
+    "bedrooms": 4,
+    "bathrooms": 4,
+    "amenities": ["Private garden", "Terrace", "Study", "Parking"],
+    "images": [
+      {
+        "url": "/images/homes/home-01.webp",
+        "fileId": "seed-hyderabad-villa-0"
+      },
+      {
+        "url": "/images/homes/home-03.webp",
+        "fileId": "seed-hyderabad-villa-1"
+      },
+      {
+        "url": "/images/homes/home-06.webp",
+        "fileId": "seed-hyderabad-villa-2"
+      }
+    ],
+    "createdAt": "2026-11-01T19:00:00.000Z"
+  },
+  {
+    "sampleKey": "bengaluru-compact",
+    "id": "079370e7-9546-5ba9-88cd-1c4944d5d0e3",
+    "ownerId": "estateiq-sample-owner",
+    "title": "The neighbourhood nook",
+    "description": "A comfortable two-bedroom apartment with a simple, practical layout and plenty of daylight. The living room opens to a small balcony, with neighbourhood shops, parks and cafes nearby. This is an illustrative sample listing. Photos and prices are for demonstration and do not represent a verified property offer.",
+    "location": "Bengaluru",
+    "address": "HSR Layout, Bengaluru",
+    "type": "Apartment",
+    "purpose": "Rent",
+    "price": 28000,
+    "area": 890,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "amenities": ["Balcony", "Lift", "Power backup", "Security"],
+    "images": [
+      {
+        "url": "/images/homes/home-12.webp",
+        "fileId": "seed-bengaluru-compact-0"
+      },
+      {
+        "url": "/images/homes/home-02.webp",
+        "fileId": "seed-bengaluru-compact-1"
+      },
+      {
+        "url": "/images/homes/home-05.webp",
+        "fileId": "seed-bengaluru-compact-2"
+      }
+    ],
+    "createdAt": "2026-11-01T20:00:00.000Z"
+  }
+]
