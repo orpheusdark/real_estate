@@ -1,6 +1,6 @@
-import { test,before,after } from 'node:test';
+import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp,readFile,readdir,rm } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import request from 'supertest';
@@ -8,28 +8,374 @@ import sharp from 'sharp';
 import { createStore } from '../src/store.js';
 import { createApp } from '../src/app.js';
 import { configuration } from '../src/config.js';
-let config,store,app,dir,owner,buyer,other,property,image;
-const home={title:'A beautiful test home',description:'A bright, spacious apartment with a quiet balcony and convenient access to local shops.',location:'Bengaluru',address:'Indiranagar, Bengaluru',type:'Apartment',purpose:'Buy',price:9500000,area:1400,bedrooms:2,bathrooms:2,amenities:['Parking','Balcony']};
-const bearer=u=>({Authorization:'Bearer '+u.token});
-function slot(days=3){const d=new Date(Date.now()+days*86400000);return d.toISOString().slice(0,10)+'T04:30:00.000Z';}
-const guest={name:'Guest Visitor',email:'guest@example.com',phone:'+91 98765 43210',startsAt:slot()};
-before(async()=>{dir=await mkdtemp(path.join(os.tmpdir(),'estateiq-test-'));config={...configuration({DEMO_MODE:'true'}),dataDir:dir,uploadDir:path.join(dir,'uploads')};store=await createStore(config);app=createApp(store,config);for(const [name,email] of [['Owner','owner@example.com'],['Buyer','buyer@example.com'],['Other','other@example.com']]){const r=await request(app).post('/api/auth/register').send({name,email,password:'StrongPassword123!'}).expect(201);if(name==='Owner')owner=r.body;if(name==='Buyer')buyer=r.body;if(name==='Other')other=r.body;}image=await sharp({create:{width:30,height:30,channels:3,background:'#335544'}}).png().toBuffer();});
-after(async()=>{await store.close();assert.ok(path.basename(dir).startsWith('estateiq-test-'));await rm(dir,{recursive:true,force:true});});
-test('configuration refuses demo in production and missing production services',()=>{assert.throws(()=>configuration({NODE_ENV:'production',DEMO_MODE:'true'}));assert.throws(()=>configuration({}));assert.throws(()=>configuration({NODE_ENV:'production',MONGODB_URI:'mongodb://localhost/test',JWT_SECRET:'x'.repeat(40)}));});
-test('registration stores a bcrypt hash and rejects duplicate or weak input',async()=>{const u=await store.one('users',{email:'owner@example.com'});assert.match(u.passwordHash,/^\$2/);assert.equal(owner.user.passwordHash,undefined);await request(app).post('/api/auth/register').send({name:'Again',email:'OWNER@example.com',password:'StrongPassword123!'}).expect(409);await request(app).post('/api/auth/register').send({name:'Weak',email:'weak@example.com',password:'short'}).expect(400);});
-test('login, current user, secure cookie attributes and invalid authentication',async()=>{const login=await request(app).post('/api/auth/login').send({email:'owner@example.com',password:'StrongPassword123!'}).expect(200);assert.match(login.headers['set-cookie'][0],/HttpOnly/);await request(app).get('/api/users/me').set(bearer(owner)).expect(200);await request(app).get('/api/users/me').set('Authorization','Bearer broken').expect(401);await request(app).post('/api/auth/login').send({email:'owner@example.com',password:'wrong'}).expect(401);await request(app).get('/api/dashboard').expect(401);});
-test('cookie writes reject missing and hostile origins; valid frontend origin succeeds',async()=>{const login=await request(app).post('/api/auth/login').send({email:'owner@example.com',password:'StrongPassword123!'});const cookie=login.headers['set-cookie'][0].split(';')[0];await request(app).post('/api/properties').set('Cookie',cookie).send(home).expect(403);await request(app).post('/api/properties').set('Cookie',cookie).set('Origin','https://attacker.example').send(home).expect(403);const r=await request(app).post('/api/properties').set('Cookie',cookie).set('Origin',config.frontend).send(home).expect(201);property=r.body;});
-test('property input is validated and owner cannot be mass assigned',async()=>{await request(app).post('/api/properties').send(home).expect(401);await request(app).post('/api/properties').set(bearer(owner)).send({...home,ownerId:other.user.id}).expect(400);await request(app).patch('/api/properties/'+property.id).set(bearer(owner)).send({...home,price:-1}).expect(400);});
-test('another user cannot edit, delete, or upload to a property',async()=>{await request(app).patch('/api/properties/'+property.id).set(bearer(other)).send(home).expect(403);await request(app).delete('/api/properties/'+property.id).set(bearer(other)).expect(403);await request(app).post(`/api/properties/${property.id}/images`).set(bearer(other)).attach('images',image,'home.png').expect(403);});
-test('owner updates a listing; filters, price ordering and pagination work',async()=>{await request(app).patch('/api/properties/'+property.id).set(bearer(owner)).send({...home,title:'An updated test home'}).expect(200);const r=await request(app).get('/api/properties?location=bengaluru&type=Apartment&minPrice=9000000&maxPrice=10000000&minArea=1300&maxArea=1500&bedrooms=2&sort=price-asc&limit=1').expect(200);assert.equal(r.body.total,1);assert.equal(r.body.items[0].title,'An updated test home');assert.equal((await request(app).get('/api/properties?purpose=Rent')).body.total,0);await request(app).get('/api/properties?minPrice=nope').expect(400);await request(app).get('/api/properties?location[$ne]=x').expect(400);await request(app).get('/api/properties/missing').expect(404);});
-test('images are decoded and converted; maximum four, corrupt files and size limits are enforced',async()=>{const r=await request(app).post(`/api/properties/${property.id}/images`).set(bearer(owner)).attach('images',image,'1.png').attach('images',image,'2.png').attach('images',image,'3.png').attach('images',image,'4.png').expect(201);assert.equal(r.body.images.length,4);assert.match(r.body.images[0].url,/\.webp$/);await request(app).get('/uploads/'+r.body.images[0].fileId).expect(200);await request(app).post(`/api/properties/${property.id}/images`).set(bearer(owner)).attach('images',image,'extra.png').expect(400);await request(app).delete(`/api/properties/${property.id}/images/${r.body.images[0].fileId}`).set(bearer(owner)).expect(200);await request(app).post(`/api/properties/${property.id}/images`).set(bearer(owner)).attach('images',Buffer.from('not a photo'),'fake.png').expect(400);await request(app).post(`/api/properties/${property.id}/images`).set(bearer(owner)).attach('images',Buffer.alloc(5*1024*1024+1),'large.png').expect(400);});
-let guestBooking,userBooking;
-test('guest booking returns a private management link without exposing the token in dashboards',async()=>{const r=await request(app).post(`/api/properties/${property.id}/appointments/guest`).send(guest).expect(201);guestBooking=r.body;assert.equal(r.body.appointment.status,'pending');assert.match(r.body.manageToken,/^[a-f0-9]{64}$/);await request(app).get('/api/appointments/manage/'+r.body.manageToken).expect(200);await request(app).get('/api/appointments/manage/'+'a'.repeat(64)).expect(404);});
-test('duplicate viewing slots, alternate timestamp representations, past and off-hour dates are rejected',async()=>{await request(app).post(`/api/properties/${property.id}/appointments/guest`).send(guest).expect(409);await request(app).post(`/api/properties/${property.id}/appointments/guest`).send({...guest,startsAt:guest.startsAt.replace('.000Z','Z')}).expect(409);await request(app).post(`/api/properties/${property.id}/appointments/guest`).send({...guest,startsAt:'2020-01-01T04:30:00.000Z'}).expect(400);await request(app).post(`/api/properties/${property.id}/appointments/guest`).send({...guest,startsAt:slot(4).replace('04:30','04:45')}).expect(400);});
-test('authenticated bookings appear in the user dashboard; unrelated users cannot cancel or confirm',async()=>{userBooking=(await request(app).post(`/api/properties/${property.id}/appointments`).set(bearer(buyer)).send({...guest,startsAt:slot(5)}).expect(201)).body;const d=await request(app).get('/api/dashboard').set(bearer(buyer)).expect(200);assert.equal(d.body.appointments.length,1);assert.equal(d.body.appointments[0].cancelHash,undefined);await request(app).patch('/api/appointments/'+userBooking.appointment.id).set(bearer(other)).send({status:'cancelled'}).expect(403);await request(app).patch('/api/appointments/'+userBooking.appointment.id).set(bearer(buyer)).send({status:'confirmed'}).expect(403);await request(app).post(`/api/properties/${property.id}/appointments`).set(bearer(owner)).send({...guest,startsAt:slot(6)}).expect(400);});
-test('owner confirms, user cancels and cancelled viewings cannot be reopened',async()=>{await request(app).patch('/api/appointments/'+userBooking.appointment.id).set(bearer(owner)).send({status:'confirmed'}).expect(200);await request(app).patch('/api/appointments/'+userBooking.appointment.id).set(bearer(buyer)).send({status:'cancelled'}).expect(200);await request(app).patch('/api/appointments/'+userBooking.appointment.id).set(bearer(owner)).send({status:'confirmed'}).expect(409);});
-test('guest can cancel with their token and the slot becomes bookable again',async()=>{await request(app).post('/api/appointments/manage/'+guestBooking.manageToken+'/cancel').expect(200);await request(app).post(`/api/properties/${property.id}/appointments/guest`).send(guest).expect(201);});
-test('password reset uses the local outbox, is single-use and invalidates existing sessions',async()=>{await request(app).post('/api/auth/forgot-password').send({email:'other@example.com'}).expect(200);const outbox=path.join(dir,'outbox');const messages=await Promise.all((await readdir(outbox)).map(f=>readFile(path.join(outbox,f),'utf8').then(JSON.parse)));const mail=messages.find(m=>m.subject==='Reset your EstateIQ password');const token=mail.text.match(/token=([a-f0-9]{64})/)[1];const data={token,password:'NewStrongPassword123!'};await request(app).post('/api/auth/reset-password').send(data).expect(200);await request(app).post('/api/auth/reset-password').send(data).expect(400);await request(app).get('/api/users/me').set(bearer(other)).expect(401);await request(app).post('/api/auth/login').send({email:'other@example.com',password:data.password}).expect(200);const known=await request(app).post('/api/auth/forgot-password').send({email:'buyer@example.com'});const unknown=await request(app).post('/api/auth/forgot-password').send({email:'unknown@example.com'});assert.equal(known.body.message,unknown.body.message);});
-test('security headers, allowlisted CORS, XML sitemap and unknown routes',async()=>{const r=await request(app).get('/api/health').set('Origin','https://attacker.example').expect(200);assert.equal(r.headers['access-control-allow-origin'],undefined);assert.equal(r.headers['x-powered-by'],undefined);assert.equal(r.headers['x-content-type-options'],'nosniff');const s=await request(app).get('/sitemap.xml').expect(200);assert.ok(s.text.includes(property.id));await request(app).get('/robots.txt').expect(200);await request(app).get('/api/not-real').expect(404);});
-test('removed listings disappear and all active viewing requests are cancelled',async()=>{await request(app).delete('/api/properties/'+property.id).set(bearer(owner)).expect(200);await request(app).get('/api/properties/'+property.id).expect(404);const d=await request(app).get('/api/dashboard').set(bearer(owner)).expect(200);assert.equal(d.body.listings.length,0);assert.ok(d.body.incoming.every(a=>a.status==='cancelled'));await request(app).post(`/api/properties/${property.id}/appointments/guest`).send({...guest,startsAt:slot(7)}).expect(404);});
-test('demo storage persists across reopening and logout revokes the token',async()=>{const reopened=await createStore(config);assert.ok(await reopened.one('users',{email:'owner@example.com'}));await reopened.close();await request(app).post('/api/auth/logout').set(bearer(owner)).expect(200);await request(app).get('/api/users/me').set(bearer(owner)).expect(401);});
+let config, store, app, dir, owner, buyer, other, property, image, mongod;
+const home = {
+  title: 'A beautiful test home',
+  description:
+    'A bright, spacious apartment with a quiet balcony and convenient access to local shops.',
+  location: 'Bengaluru',
+  address: 'Indiranagar, Bengaluru',
+  type: 'Apartment',
+  purpose: 'Buy',
+  price: 9500000,
+  area: 1400,
+  bedrooms: 2,
+  bathrooms: 2,
+  amenities: ['Parking', 'Balcony'],
+};
+const bearer = (u) => ({ Authorization: 'Bearer ' + u.token });
+function slot(days = 3) {
+  const d = new Date(Date.now() + days * 86400000);
+  return d.toISOString().slice(0, 10) + 'T04:30:00.000Z';
+}
+const guest = {
+  name: 'Guest Visitor',
+  email: 'guest@example.com',
+  phone: '+91 98765 43210',
+  startsAt: slot(),
+};
+before(async () => {
+  dir = await mkdtemp(path.join(os.tmpdir(), 'estateiq-test-'));
+  config = {
+    ...configuration({ DEMO_MODE: 'true' }),
+    dataDir: dir,
+    uploadDir: path.join(dir, 'uploads'),
+  };
+  if (process.env.TEST_MONGO === 'true') {
+    const { MongoMemoryServer } = await import('mongodb-memory-server-core');
+    mongod = await MongoMemoryServer.create();
+    process.env.MONGODB_URI = mongod.getUri('estateiq_test');
+  }
+  store = await createStore({ ...config, demo: !mongod });
+  app = createApp(store, config);
+  for (const [name, email] of [
+    ['Owner', 'owner@example.com'],
+    ['Buyer', 'buyer@example.com'],
+    ['Other', 'other@example.com'],
+  ]) {
+    const r = await request(app)
+      .post('/api/auth/register')
+      .send({ name, email, password: 'StrongPassword123!' })
+      .expect(201);
+    if (name === 'Owner') owner = r.body;
+    if (name === 'Buyer') buyer = r.body;
+    if (name === 'Other') other = r.body;
+  }
+  image = await sharp({ create: { width: 30, height: 30, channels: 3, background: '#335544' } })
+    .png()
+    .toBuffer();
+});
+after(async () => {
+  await store.close();
+  if (mongod) await mongod.stop();
+  assert.ok(path.basename(dir).startsWith('estateiq-test-'));
+  await rm(dir, { recursive: true, force: true });
+});
+test('configuration refuses demo in production and missing production services', () => {
+  assert.throws(() => configuration({ NODE_ENV: 'production', DEMO_MODE: 'true' }));
+  assert.throws(() => configuration({}));
+  assert.throws(() =>
+    configuration({
+      NODE_ENV: 'production',
+      MONGODB_URI: 'mongodb://localhost/test',
+      JWT_SECRET: 'x'.repeat(40),
+    }),
+  );
+});
+test('registration stores a bcrypt hash and rejects duplicate or weak input', async () => {
+  const u = await store.one('users', { email: 'owner@example.com' });
+  assert.match(u.passwordHash, /^\$2/);
+  assert.equal(owner.user.passwordHash, undefined);
+  await request(app)
+    .post('/api/auth/register')
+    .send({ name: 'Again', email: 'OWNER@example.com', password: 'StrongPassword123!' })
+    .expect(409);
+  await request(app)
+    .post('/api/auth/register')
+    .send({ name: 'Weak', email: 'weak@example.com', password: 'short' })
+    .expect(400);
+});
+test('login, current user, secure cookie attributes and invalid authentication', async () => {
+  const login = await request(app)
+    .post('/api/auth/login')
+    .send({ email: 'owner@example.com', password: 'StrongPassword123!' })
+    .expect(200);
+  assert.match(login.headers['set-cookie'][0], /HttpOnly/);
+  await request(app).get('/api/users/me').set(bearer(owner)).expect(200);
+  await request(app).get('/api/users/me').set('Authorization', 'Bearer broken').expect(401);
+  await request(app)
+    .post('/api/auth/login')
+    .send({ email: 'owner@example.com', password: 'wrong' })
+    .expect(401);
+  await request(app).get('/api/dashboard').expect(401);
+});
+test('cookie writes reject missing and hostile origins; valid frontend origin succeeds', async () => {
+  const login = await request(app)
+    .post('/api/auth/login')
+    .send({ email: 'owner@example.com', password: 'StrongPassword123!' });
+  const cookie = login.headers['set-cookie'][0].split(';')[0];
+  await request(app).post('/api/properties').set('Cookie', cookie).send(home).expect(403);
+  await request(app)
+    .post('/api/properties')
+    .set('Cookie', cookie)
+    .set('Origin', 'https://attacker.example')
+    .send(home)
+    .expect(403);
+  const r = await request(app)
+    .post('/api/properties')
+    .set('Cookie', cookie)
+    .set('Origin', config.frontend)
+    .send(home)
+    .expect(201);
+  property = r.body;
+});
+test('property input is validated and owner cannot be mass assigned', async () => {
+  await request(app).post('/api/properties').send(home).expect(401);
+  await request(app)
+    .post('/api/properties')
+    .set(bearer(owner))
+    .send({ ...home, ownerId: other.user.id })
+    .expect(400);
+  await request(app)
+    .patch('/api/properties/' + property.id)
+    .set(bearer(owner))
+    .send({ ...home, price: -1 })
+    .expect(400);
+});
+test('another user cannot edit, delete, or upload to a property', async () => {
+  await request(app)
+    .patch('/api/properties/' + property.id)
+    .set(bearer(other))
+    .send(home)
+    .expect(403);
+  await request(app)
+    .delete('/api/properties/' + property.id)
+    .set(bearer(other))
+    .expect(403);
+  await request(app)
+    .post(`/api/properties/${property.id}/images`)
+    .set(bearer(other))
+    .attach('images', image, 'home.png')
+    .expect(403);
+});
+test('owner updates a listing; filters, price ordering and pagination work', async () => {
+  await request(app)
+    .patch('/api/properties/' + property.id)
+    .set(bearer(owner))
+    .send({ ...home, title: 'An updated test home' })
+    .expect(200);
+  const r = await request(app)
+    .get(
+      '/api/properties?location=bengaluru&type=Apartment&minPrice=9000000&maxPrice=10000000&minArea=1300&maxArea=1500&bedrooms=2&sort=price-asc&limit=1',
+    )
+    .expect(200);
+  assert.equal(r.body.total, 1);
+  assert.equal(r.body.items[0].title, 'An updated test home');
+  assert.equal((await request(app).get('/api/properties?purpose=Rent')).body.total, 0);
+  await request(app).get('/api/properties?minPrice=nope').expect(400);
+  await request(app).get('/api/properties?location[$ne]=x').expect(400);
+  await request(app).get('/api/properties/missing').expect(404);
+});
+test('images are decoded and converted; maximum four, corrupt files and size limits are enforced', async () => {
+  const r = await request(app)
+    .post(`/api/properties/${property.id}/images`)
+    .set(bearer(owner))
+    .attach('images', image, '1.png')
+    .attach('images', image, '2.png')
+    .attach('images', image, '3.png')
+    .attach('images', image, '4.png')
+    .expect(201);
+  assert.equal(r.body.images.length, 4);
+  assert.match(r.body.images[0].url, /\.webp$/);
+  await request(app)
+    .get('/uploads/' + r.body.images[0].fileId)
+    .expect(200);
+  await request(app)
+    .post(`/api/properties/${property.id}/images`)
+    .set(bearer(owner))
+    .attach('images', image, 'extra.png')
+    .expect(400);
+  await request(app)
+    .delete(`/api/properties/${property.id}/images/${r.body.images[0].fileId}`)
+    .set(bearer(owner))
+    .expect(200);
+  await request(app)
+    .post(`/api/properties/${property.id}/images`)
+    .set(bearer(owner))
+    .attach('images', Buffer.from('not a photo'), 'fake.png')
+    .expect(400);
+  await request(app)
+    .post(`/api/properties/${property.id}/images`)
+    .set(bearer(owner))
+    .attach('images', Buffer.alloc(5 * 1024 * 1024 + 1), 'large.png')
+    .expect(400);
+});
+let guestBooking, userBooking;
+test('guest booking returns a private management link without exposing the token in dashboards', async () => {
+  const r = await request(app)
+    .post(`/api/properties/${property.id}/appointments/guest`)
+    .send(guest)
+    .expect(201);
+  guestBooking = r.body;
+  assert.equal(r.body.appointment.status, 'pending');
+  assert.match(r.body.manageToken, /^[a-f0-9]{64}$/);
+  await request(app)
+    .get('/api/appointments/manage/' + r.body.manageToken)
+    .expect(200);
+  await request(app)
+    .get('/api/appointments/manage/' + 'a'.repeat(64))
+    .expect(404);
+});
+test('duplicate viewing slots, alternate timestamp representations, past and off-hour dates are rejected', async () => {
+  await request(app)
+    .post(`/api/properties/${property.id}/appointments/guest`)
+    .send(guest)
+    .expect(409);
+  await request(app)
+    .post(`/api/properties/${property.id}/appointments/guest`)
+    .send({ ...guest, startsAt: guest.startsAt.replace('.000Z', 'Z') })
+    .expect(409);
+  await request(app)
+    .post(`/api/properties/${property.id}/appointments/guest`)
+    .send({ ...guest, startsAt: '2020-01-01T04:30:00.000Z' })
+    .expect(400);
+  await request(app)
+    .post(`/api/properties/${property.id}/appointments/guest`)
+    .send({ ...guest, startsAt: slot(4).replace('04:30', '04:45') })
+    .expect(400);
+});
+test('authenticated bookings appear in the user dashboard; unrelated users cannot cancel or confirm', async () => {
+  userBooking = (
+    await request(app)
+      .post(`/api/properties/${property.id}/appointments`)
+      .set(bearer(buyer))
+      .send({ ...guest, startsAt: slot(5) })
+      .expect(201)
+  ).body;
+  const d = await request(app).get('/api/dashboard').set(bearer(buyer)).expect(200);
+  assert.equal(d.body.appointments.length, 1);
+  assert.equal(d.body.appointments[0].cancelHash, undefined);
+  await request(app)
+    .patch('/api/appointments/' + userBooking.appointment.id)
+    .set(bearer(other))
+    .send({ status: 'cancelled' })
+    .expect(403);
+  await request(app)
+    .patch('/api/appointments/' + userBooking.appointment.id)
+    .set(bearer(buyer))
+    .send({ status: 'confirmed' })
+    .expect(403);
+  await request(app)
+    .post(`/api/properties/${property.id}/appointments`)
+    .set(bearer(owner))
+    .send({ ...guest, startsAt: slot(6) })
+    .expect(400);
+});
+test('owner confirms, user cancels and cancelled viewings cannot be reopened', async () => {
+  await request(app)
+    .patch('/api/appointments/' + userBooking.appointment.id)
+    .set(bearer(owner))
+    .send({ status: 'confirmed' })
+    .expect(200);
+  await request(app)
+    .patch('/api/appointments/' + userBooking.appointment.id)
+    .set(bearer(buyer))
+    .send({ status: 'cancelled' })
+    .expect(200);
+  await request(app)
+    .patch('/api/appointments/' + userBooking.appointment.id)
+    .set(bearer(owner))
+    .send({ status: 'confirmed' })
+    .expect(409);
+});
+test('guest can cancel with their token and the slot becomes bookable again', async () => {
+  await request(app)
+    .post('/api/appointments/manage/' + guestBooking.manageToken + '/cancel')
+    .expect(200);
+  await request(app)
+    .post(`/api/properties/${property.id}/appointments/guest`)
+    .send(guest)
+    .expect(201);
+});
+test('password reset uses the local outbox, is single-use and invalidates existing sessions', async () => {
+  await request(app)
+    .post('/api/auth/forgot-password')
+    .send({ email: 'other@example.com' })
+    .expect(200);
+  const outbox = path.join(dir, 'outbox');
+  const messages = await Promise.all(
+    (await readdir(outbox)).map((f) => readFile(path.join(outbox, f), 'utf8').then(JSON.parse)),
+  );
+  const mail = messages.find((m) => m.subject === 'Reset your EstateIQ password');
+  const token = mail.text.match(/token=([a-f0-9]{64})/)[1];
+  const data = { token, password: 'NewStrongPassword123!' };
+  await request(app).post('/api/auth/reset-password').send(data).expect(200);
+  await request(app).post('/api/auth/reset-password').send(data).expect(400);
+  await request(app).get('/api/users/me').set(bearer(other)).expect(401);
+  await request(app)
+    .post('/api/auth/login')
+    .send({ email: 'other@example.com', password: data.password })
+    .expect(200);
+  const known = await request(app)
+    .post('/api/auth/forgot-password')
+    .send({ email: 'buyer@example.com' });
+  const unknown = await request(app)
+    .post('/api/auth/forgot-password')
+    .send({ email: 'unknown@example.com' });
+  assert.equal(known.body.message, unknown.body.message);
+});
+test('security headers, allowlisted CORS, XML sitemap and unknown routes', async () => {
+  const r = await request(app)
+    .get('/api/health')
+    .set('Origin', 'https://attacker.example')
+    .expect(200);
+  assert.equal(r.headers['access-control-allow-origin'], undefined);
+  assert.equal(r.headers['x-powered-by'], undefined);
+  assert.equal(r.headers['x-content-type-options'], 'nosniff');
+  const s = await request(app).get('/sitemap.xml').expect(200);
+  assert.ok(s.text.includes(property.id));
+  await request(app).get('/robots.txt').expect(200);
+  await request(app).get('/api/not-real').expect(404);
+});
+test('removed listings disappear and all active viewing requests are cancelled', async () => {
+  await request(app)
+    .delete('/api/properties/' + property.id)
+    .set(bearer(owner))
+    .expect(200);
+  await request(app)
+    .get('/api/properties/' + property.id)
+    .expect(404);
+  const d = await request(app).get('/api/dashboard').set(bearer(owner)).expect(200);
+  assert.equal(d.body.listings.length, 0);
+  assert.ok(d.body.incoming.every((a) => a.status === 'cancelled'));
+  await request(app)
+    .post(`/api/properties/${property.id}/appointments/guest`)
+    .send({ ...guest, startsAt: slot(7) })
+    .expect(404);
+});
+test('demo storage persists across reopening and logout revokes the token', async () => {
+  if (!mongod) {
+    const reopened = await createStore(config);
+    assert.ok(await reopened.one('users', { email: 'owner@example.com' }));
+    await reopened.close();
+  } else {
+    assert.ok(await store.one('users', { email: 'owner@example.com' }));
+  }
+  await request(app).post('/api/auth/logout').set(bearer(owner)).expect(200);
+  await request(app).get('/api/users/me').set(bearer(owner)).expect(401);
+});
+
+test('auth rate limiting returns 429 after repeated attempts', async () => {
+  let limited = false;
+  for (let i = 0; i < 32; i++) {
+    const r = await request(app)
+      .post('/api/auth/forgot-password')
+      .send({ email: 'missing@example.com' });
+    if (r.status === 429) {
+      limited = true;
+      break;
+    }
+    assert.equal(r.status, 200);
+  }
+  assert.equal(limited, true);
+});
